@@ -7,7 +7,7 @@ import numpy as np
 # ugradio.pico.VOLT_RANGE = ['50mV', '100mV', '200mV', '500mV', '1V', '2V', '5V', '10V', '20V']
 
 # set for data taking
-vrange = ugradio.pico.VOLT_RANGE[4]
+vrange = ugradio.pico.VOLT_RANGE[0]
 division = 1 # 5 will turn 62.5 MHz sample rate into 12.5 MHz sample rate
 
 # should be power of 2
@@ -17,10 +17,10 @@ division = 1 # 5 will turn 62.5 MHz sample rate into 12.5 MHz sample rate
 # samples = 2**12
 
 # dual mode (set to True to sample both A and B ports)
-mode = True
+mode = False
 
 # capture data and write to file (will repeat N times)
-N = 2
+N = 32
 for i in range(N):
     data = ugradio.pico.capture_data(vrange, 1, dual_mode=mode)
-    np.savetxt(f'output-mixer-{i}', data)
+    np.savetxt(f'output-noise-{i}', data)
