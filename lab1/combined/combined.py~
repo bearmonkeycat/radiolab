@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sp
 import scipy.signal as signal
-import ugradio
 
 # load the data
 darray = []
@@ -59,56 +58,6 @@ ferror = [f"{item:2.2e}" for item in error]
 points = np.arange(0,10,1)
 fftfreqticks = [f"{item:2.2e}" for item in fftfreqs]
 
-# plot spectral leakage
-# make f parameter way too small
-def hann(x, N):
-	return np.sin(np.pi*x*N)**2
-
-
-f = np.linspace(-6e6, 6e6, 500)
-dft1 = ugradio.dft.dft(darray[8], vsamp=12.5e6)
-N = len(dft1[0])
-x = np.linspace(0,N,N)
-dft2 = ugradio.dft.dft(darray[8], f=f, vsamp=12.5e6)
-dft3 = ugradio.dft.dft(darray[8]*hann(x, N), vsamp=12.5e6)
-
-# find error introduced from hann window
-maximum_default_index = np.argmax(dft1[1])
-maximum_hann_index = np.argmax(dft3[1])
-maximum_default = dft1[1][maximum_default_index]
-maximum_hann = dft1[1][maximum_hann_index]
-error = np.abs(maximum_default - maximum_hann)
-print(error)
-
-fig, ax = plt.subplots() # create a new figure with a default 111 subplot
-#ax.plot(overview_data_x, overview_data_y)
-ax.plot(dft2[0], np.abs(dft2[1])**2, label="N=1000")
-ax.plot(dft1[0], np.abs(dft1[1])**2, label=f"N={N}")
-ax.plot(dft3[0], np.abs(dft3[1])**2, label="Hann Window")
-ax.set_yscale('log')
-ax.set_ylabel("Intensity ~W/Hz")
-ax.set_xlabel(r"$\nu$ Hz")
-ax.grid()
-ax.legend()
-
-from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
-axins = zoomed_inset_axes(ax, 100, loc=2) # zoom-factor: 2.5, location: upper-left
-
-axins.plot(dft2[0], np.abs(dft2[1])**2, label="N=1000")
-axins.plot(dft1[0], np.abs(dft1[1])**2, label=f"N={N}")
-axins.plot(dft3[0], np.abs(dft3[1])**2, label="Hann Window")
-x1, x2, y1, y2 = -1260000, -1230000, 1.5e4, 1.75e4 # specify the limits
-axins.set_xlim(x1, x2) # apply the x-limits
-axins.set_ylim(y1, y2) # apply the y-limits
-plt.yticks(visible=False)
-plt.xticks(visible=False)
-from mpl_toolkits.axes_grid1.inset_locator import mark_inset
-mark_inset(ax, axins, loc1=1, loc2=4, fc="none", ec="0.75")
-axins.grid()
-plt.show()
-
-
-
 ''' plotting for first figure '''
 
 '''
@@ -155,8 +104,8 @@ acfsparray = []
 for i in range(9):
     acfsparray.append(signal.correlate(fftarray[i], fftarray[i]))
 
-#print(acfnparray[8])
-#print(acfsparray[8])
+print(acfnparray[8])
+print(acfsparray[8])
 
 ''' plotting for acf stuff'''
 
