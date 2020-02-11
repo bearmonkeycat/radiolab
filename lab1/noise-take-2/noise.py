@@ -53,7 +53,8 @@ popt, pcov = optimize.curve_fit(gaussian, bincenters, hist, p0)
 perr = np.sqrt(np.diag(pcov))
 
 nu = np.linspace(-30000, 30000, 10000)
-
+print(popt)
+print(f"The max value was: {darray[0][np.argmax(darray[0])]}")
 # plot the histogram with curve fit
 '''
 plt.hist(darray[0], bins=100)
@@ -103,7 +104,16 @@ noise_std.append(np.mean(average8_pspec)/np.std(average8_pspec))
 noise_std.append(np.mean(average16_pspec)/np.std(average16_pspec))
 noise_std.append(np.mean(average_pspec)/np.std(average_pspec))
 
+# calculate the standard deviation of each plot for entropy
 
+noise_e = []
+noise_e.append(np.std(average2_pspec))
+noise_e.append(np.std(average4_pspec))
+noise_e.append(np.std(average8_pspec))
+noise_e.append(np.std(average16_pspec))
+noise_e.append(np.std(average_pspec))
+
+noise_e = np.array(noise_e)
 # find slope of the curve
 def linear_fit(x, n, b):
     return n*x + b
@@ -119,7 +129,7 @@ print(popt[1])
 
 # plt.plot(f, pspecarray[0], label="First Block")
 # plot signal to noise
-
+'''
 plt.plot(np.log(N), np.log(noise_std), label="SNR")
 plt.plot(x,y, label="Linear Fit")
 plt.ylabel(r"$\log(\mu/\sigma)$")
@@ -127,7 +137,20 @@ plt.xlabel(r"$\log(N)$")
 plt.legend()
 plt.grid()
 plt.show()
+'''
 
+# plot entropy
+def entropy(sigma):
+    return (.5)*np.log(2*np.pi*np.e*sigma**2)
+
+
+plt.plot(N, entropy(noise_e), label="Entropy")
+#plt.plot(x,y, label="Linear Fit")
+plt.ylabel(r"$\frac{1}{2}\log\left(2\pi e \sigma^2\right)$")
+plt.xlabel(r"$N$")
+plt.legend()
+plt.grid()
+plt.show()
 
 
 print(average_pspec)
