@@ -1,0 +1,9 @@
+import numpy as np
+
+data = dict()
+
+for i in range(100):
+    data[f"dataset_{i}"] = np.loadtxt(f"output-calibrate-{i}")
+
+
+
