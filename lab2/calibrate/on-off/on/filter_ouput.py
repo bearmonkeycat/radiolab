@@ -23,4 +23,4 @@ average = np.average(averages, axis=0)
 
 #print(average)
 #print(len(average))
-np.savetxt('averaged_ouput', average)
+np.savetxt('averaged_ouput_on', average)
