@@ -23,4 +23,4 @@ mode = True
 N = 3
 for i in range(11):
     data = ugradio.pico.capture_data(vrange, 1, dual_mode=mode)
-    np.savetxt(f'output-ssb-mixer-{i}', data)
+    np.savetxt(f'output-calibrate-{i}', data)
