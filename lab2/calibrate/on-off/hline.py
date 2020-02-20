@@ -39,7 +39,7 @@ on_power = np.abs(np.fft.fftshift(fourier_on))**2
 #plt.plot(fourier_axis_off, off_power, label="off")
 #plt.plot(fourier_axis_on, on_power, label="on")
 plt.plot(fourier_axis_on, (on_power/off_power)*260, label="div")
-plt.yscale('log')
+#plt.yscale('log')
 plt.ylabel(r'Brightness Temperature $T_B$')
 plt.xlabel(r'$\nu$ Hz')
 plt.grid()
