@@ -38,6 +38,7 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1,
     raw_data = ugradio.pico.capture_data(vrange, div, dual, nsamp, nblock, host, port, verbose)
     finish = time.time()
     print("data capture finished")
+    print(f"data written to {file_name}")
     tag_data(file_name, start, finish)
     np.savetxt(file_name, raw_data)
     
@@ -58,7 +59,7 @@ def tag_data(fname, start, finish):
     (location_information, err) = loc.communicate()
     
     
-    with open(fname, 'w') as ouput:
+    with open(fname, 'w') as output:
         output.write(f"Notes for data samples in {fname}")
         output.write(f"Sampling was started at: {start}")
         output.write(f"Sampling was completed at: {finish}")
