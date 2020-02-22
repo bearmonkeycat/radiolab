@@ -53,7 +53,7 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1,
     print("data capture finished")
     tag_data(file_name, start, finish, parameters)
     if args.directory:
-        path = args.directory + file_name
+        path = "./" + args.directory + file_name
         np.savetxt(path, raw_data)
         print(f"data written to {path}")
     else:
@@ -67,6 +67,9 @@ def tag_data(fname, start, finish, params):
     '''Tag data capture with a text file containing time/data/location information'''
     # make output file name
     ofname = "tagfile-" + fname
+
+    if args.directory:
+        ofname = "./" + args.directory + ofname
     
     # get ip address
     ip = subprocess.Popen(["curl",  "-s", "https://ipinfo.io/ip"], stdout=subprocess.PIPE)
