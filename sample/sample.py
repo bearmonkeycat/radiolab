@@ -44,7 +44,10 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1,
         file_name = str(get_time(unix=get_time())) + "jd"
 
     if args.directory:
-        os.mkdir(args.directory)
+        if os.path.isfile(args.directory):
+            pass
+        else:
+            os.mkdir(args.directory)
 
     # capture data
     start = get_time()
