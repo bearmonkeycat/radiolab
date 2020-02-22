@@ -22,7 +22,7 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1,
     verbose = verbose
 
     if file_name is None:
-        file_name = str(get_time(unix=get_time()) + "jd"
+        file_name = str(get_time(unix=get_time())) + "jd"
 
     start = get_time()
     raw_data = ugradio.pico.capture_data(vrange, div, dual, nsamp, nblock, host, port, verbose)
@@ -37,34 +37,41 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1,
     
 def tag_data(fname, start, finish):
     '''Tags data capture with a text file containing time/data/location information'''
-    # make file name
-    fname = "tagfile-" + fname
+    # make output file name
+    ofname = "tagfile-" + fname
     
-    # get ip address and geolocation (lat, long, etc.)
+    # get ip address
     ip = subprocess.Popen(["curl",  "-s", "https://ipinfo.io/ip"], stdout=subprocess.PIPE)
     (ip_address, err) = ip.communicate()
     ip_address_text = ip_address.decode("utf-8").rstrip()
+
+    # get location information
     lookup = f"http://api.geoiplookup.net/?query={ip_address_text}"
     loc = subprocess.Popen(["curl", "-s", lookup], stdout=subprocess.PIPE)
     (location_information, err) = loc.communicate()
     loc_info = location_information.decode("utf-8")
-    
+
+    # parse latitude
     lat_find = re.search(r'\<latitude>[\s\S]*?<\/latitude>', loc_info)
     latitude = lat_find.group()
     lat = re.sub('<[^<]+>', "", latitude)
-    
+
+    # parse longitude
     long_find = re.search(r'\<longitude>[\s\S]*?<\/longitude>', loc_info)
     longitude = long_find.group()
     longi = re.sub('<[^<]+>', "", longitude)    
-    
+
+    # parse isp
     isp_find = re.search(r'\<isp>[\s\S]*?<\/isp>', loc_info)
     internet_service_provider = isp_find.group()
     isp = re.sub('<[^<]+>', "", internet_service_provider)
 
+    # parse city
     city_find = re.search(r'\<city>[\s\S]*?<\/city>', loc_info)
     city = city_find.group()
     cty = re.sub('<[^<]+>', "", city)
 
+    # parse country
     country_find = re.search(r'\<countryname>[\s\S]*?<\/countryname>', loc_info)
     country = country_find.group()
     ctry = re.sub('<[^<]+>', "", country)
@@ -73,10 +80,11 @@ def tag_data(fname, start, finish):
 
 
     
-    with open(fname, 'w') as output:
+    with open(ofname, 'w') as output:
         output.write(f"Notes for data samples in {fname}\n")
-        output.write(f"Sampling was started at: {start}\n")
-        output.write(f"Sampling was completed at: {finish}\n")
+        output.write(f"Sampling was started at (unix): {start}\n")
+        output.write(f"Sampling was completed at (unix): {finish}\n")
+        output.write(f"Dat capture took: {finish - start} seconds\n")
         output.write(f"Julian date of sample: {get_time(unix=start)}\n")
         output.write(f"IP address of computer sampling: {ip_address_text}\n")
         output.write(f"ISP used for internet access: {isp}\n")
@@ -91,10 +99,11 @@ def tag_data(fname, start, finish):
 
 def average_data():
     '''averages data into a single average file'''
-
+    # import average data code
+    
 def transform():
     '''transforms coordinates'''
-    # need rotation matrix
+    # need rotation matrix stuff
 
 def get_time(jd=None, unix=None):
    '''Return (current) time, in seconds since the Epoch (00:00:00 
@@ -141,6 +150,7 @@ if __name__ == "__main__":
    import astropy
    import matplotlib.pyplot as plt
    import traceback
+   import time
 
    # argparse stuff
    parser = argparse.ArgumentParser(description='program to capture data via digital sampling')
@@ -160,6 +170,7 @@ if __name__ == "__main__":
 
    '''capture data if toggled'''
    if args.capture:
+       # add multi-block data capabilities
        
        try:
            capture()
@@ -182,3 +193,4 @@ else:
    import astropy
    import matplotlib.pyplot as plt
    import traceback
+   import time
