@@ -128,7 +128,7 @@ def tag_data(fname, start, finish, params):
 
         # write out parameters used
         output.write(f"Paramters for Data Capture\n")
-        for i in len(params):
+        for i in range(len(params)):
             output.write(f"{parameters[i]}: {params[i]}\n")
 
         # write out location information
