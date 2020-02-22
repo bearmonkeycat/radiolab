@@ -145,8 +145,8 @@ if __name__ == "__main__":
        try:
            capture()
            
-       except:
+       except Exception:
            print("[[AN ERROR OCCURED]]")
-           traceback.print_exception()
+           traceback.print_exc()
            sys.exit(1)
 
