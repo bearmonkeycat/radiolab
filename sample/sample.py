@@ -217,6 +217,7 @@ def get_date(utc=False):
 if __name__ == "__main__":
    from sys import argv
    import sys
+   import os
    import subprocess
    import re
    import argparse
@@ -299,6 +300,7 @@ if __name__ == "__main__":
 else:
    from sys import argv
    import sys
+   import os
    import subprocess
    import re
    import argparse
