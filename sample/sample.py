@@ -37,6 +37,7 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1,
     start = time.time()
     raw_data = ugradio.pico.capture_data(vrange, div, dual, nsamp, nblock, host, port, verbose)
     finish = time.time()
+    print("data capture finished")
     tag_data(file_name, start, finish)
     np.savetxt(file_name, raw_data)
     
@@ -45,7 +46,9 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1,
     
 def tag_data(fname, start, finish):
     '''tags data with a text file containing time/data information'''
-
+    # make file name
+    fname = "tagfile-" + fname
+    
     # get ip address and geolocation (lat and long)
     ip = subprocess.Popen(["curl",  "-s", "https://ipinfo.io/ip"], stdout=subprocess.PIPE)
     (ip_address, err) = ip.communicate()
@@ -53,6 +56,7 @@ def tag_data(fname, start, finish):
     lookup = f"http://api.geoiplookup.net/?query={ip_address_text}"
     loc = subprocess.Popen(["curl", "-s", lookup], stdout=subprocess.PIPE)
     (location_information, err) = loc.communicate
+    
     
     with open(fname, 'w') as ouput:
         output.write(f"Notes for data samples in {fname}")
@@ -62,7 +66,8 @@ def tag_data(fname, start, finish):
         output.write(f"ip address of computer sampling: {ip_address_text}")
         output.write(f"Location Information:")
         output.write(location_information)
-        
+    print("tag file written to {fname}")
+    
 
 def average_data():
     '''averages data into a single average file'''
