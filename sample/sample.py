@@ -8,6 +8,7 @@ import astropy
 import astropy.time as at
 import ugradio
 import time
+import re
 # program to capture data via digital sampling
 # kyle miller, gpl-licensed
 #
@@ -53,7 +54,7 @@ def tag_data(fname, start, finish):
     # get ip address and geolocation (lat and long)
     ip = subprocess.Popen(["curl",  "-s", "https://ipinfo.io/ip"], stdout=subprocess.PIPE)
     (ip_address, err) = ip.communicate()
-    ip_address_text = ip_address.decode("utf-8")
+    ip_address_text = ip_address.decode("utf-8").rstrip()
     lookup = f"http://api.geoiplookup.net/?query={ip_address_text}"
     loc = subprocess.Popen(["curl", "-s", lookup], stdout=subprocess.PIPE)
     (location_information, err) = loc.communicate()
