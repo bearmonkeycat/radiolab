@@ -1,4 +1,5 @@
 import argparse
+import subprocess
 from sys import argv
 import numpy as np
 import scipy as sp
@@ -15,7 +16,7 @@ import time
 
 
 # functions used in the program
-def capture(volt_range=0, divisor=1, dual_mode=False, nsampes=16000, nblocks=1, host='10.32.92.95', port=1340, verbose=False, file_name=None):
+def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1, host='10.32.92.95', port=1340, verbose=False, file_name=None):
     '''caputures raw data from pico sampler'''
     # default voltage ranges from ugradio package
     # ugradio.pico.VOLT_RANGE = ['50mV', '100mV', '200mV', '500mV', '1V', '2V', '5V', '10V', '20V']
@@ -31,16 +32,37 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsampes=16000, nblocks=1, 
     verbose = verbose
 
     if file_name is None:
-        file_name = str(get_time(unix=time.time()))
+        file_name = str(get_time(unix=time.time())) + "jd"
 
+    start = time.time()
     raw_data = ugradio.pico.capture_data(vrange, div, dual, nsamp, nblock, host, port, verbose)
-    np.savetxt(raw_data, file_name)
+    finish = time.time()
+    tag_data(file_name, start, finish)
+    np.savetxt(file_name, raw_data)
     
 
 
     
-def tag_data():
+def tag_data(fname, start, finish):
     '''tags data with a text file containing time/data information'''
+
+    # get ip address and geolocation (lat and long)
+    ip = subprocess.Popen(["curl",  "-s", "https://ipinfo.io/ip"], stdout=subprocess.PIPE)
+    (ip_address, err) = ip.communicate()
+    ip_address_text = ip_address.decode("utf-8")
+    lookup = f"http://api.geoiplookup.net/?query={ip_address_text}"
+    loc = subprocess.Popen(["curl", "-s", lookup], stdout=subprocess.PIPE)
+    (location_information, err) = loc.communicate
+    
+    with open(fname, 'w') as ouput:
+        output.write(f"Notes for data samples in {fname}")
+        output.write(f"Sampling was started at: {start}")
+        output.write(f"Sampling was completed at: {finish}")
+        output.write(f"Julian date of sample: {get_time(time.time()):d}")
+        output.write(f"ip address of computer sampling: {ip_address_text}")
+        output.write(f"Location Information:")
+        output.write(location_information)
+        
 
 def average_data():
     '''averages data into a single average file'''
@@ -109,14 +131,15 @@ if __name__ == "__main__":
       print(f"The current unix time is: {get_time()}")
       
 
-      
+
    '''capture data if toggled'''
    if args.capture:
        
        try:
            capture()
            
-       except:
-           print("error occured while trying to capture data")
+       except Exception as e:
+           print("[[AN ERROR OCCURED]]")
+           print(e)
            sys.exit(1)
 
