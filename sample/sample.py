@@ -58,6 +58,7 @@ def tag_data(fname, start, finish):
     loc = subprocess.Popen(["curl", "-s", lookup], stdout=subprocess.PIPE)
     (location_information, err) = loc.communicate()
     loc_info = location_information.decode("utf-8")
+    print(loc_info)
     
     
     with open(fname, 'w') as output:
@@ -68,6 +69,8 @@ def tag_data(fname, start, finish):
         output.write(f"ip address of computer sampling: {ip_address_text}\n")
         output.write(f"Location Information:\n")
         output.write(loc_info)
+        output.write('\neof\n')
+        
     print(f"tag file written to {fname}")
     
 
