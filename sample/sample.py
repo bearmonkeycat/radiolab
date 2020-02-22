@@ -1,18 +1,33 @@
-# program to capture data via digital sampling
-# kyle miller, gpl-3.0-licensed
-#
+#!/usr/bin/env python
+""" Program to capture data via digital sampling
 
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
 
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>.
+"""
+
+__author__ = "kyle miller"
+__copyright__ = "Copyright 2020, Kyle Miller"
+__date__ = "2020/02/22"
+__license__ = "GPLv3"
+__status__ = "alpha"
+__version__ = "0.0.1"
 
 
 # functions used in the program
 def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1, host='10.32.92.95', port=1340, verbose=False, file_name=None):
-    '''caputures raw data from pico sampler'''
-    # default voltage ranges from ugradio package
-    # ugradio.pico.VOLT_RANGE = ['50mV', '100mV', '200mV', '500mV', '1V', '2V', '5V', '10V', '20V']
+    '''Caputure raw data from pico sampler'''
+    # parameters for data capture
+    # default voltage ranges from ugradio package:: ugradio.pico.VOLT_RANGE
     voltages = ['50mV', '100mV', '200mV', '500mV', '1V', '2V', '5V', '10V', '20V']
     vrange = voltages[volt_range]
-    
     div = divisor
     dual = dual_mode
     nsamp = nsamples
@@ -21,22 +36,35 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1,
     port = port
     verbose = verbose
 
+    # parameters in list form
+    parameters = [vrange, div, dual, nsamp, nblock, host, port, verbose]
+
+    # logistics for storing data capture
     if file_name is None:
         file_name = str(get_time(unix=get_time())) + "jd"
 
+    if args.directory:
+        os.mkdir(args.directory)
+
+    # capture data
     start = get_time()
     raw_data = ugradio.pico.capture_data(vrange, div, dual, nsamp, nblock, host, port, verbose)
     finish = get_time()
     print("data capture finished")
-    tag_data(file_name, start, finish)
-    np.savetxt(file_name, raw_data)
-    print(f"data written to {file_name}")
+    tag_data(file_name, start, finish, parameters)
+    if args.directory:
+        path = args.directory + file_name
+        np.savetxt(path, raw_data)
+        print(f"data written to {path}")
+    else:
+        np.savetxt(file_name, raw_data)
+        print(f"data written to {file_name}")
 
 
 
     
-def tag_data(fname, start, finish):
-    '''Tags data capture with a text file containing time/data/location information'''
+def tag_data(fname, start, finish, params):
+    '''Tag data capture with a text file containing time/data/location information'''
     # make output file name
     ofname = "tagfile-" + fname
     
@@ -76,12 +104,15 @@ def tag_data(fname, start, finish):
     country = country_find.group()
     ctry = re.sub('<[^<]+>', "", country)
 
-    # convert lat long to astronical coordinates
+    # convert lat long to astronomical coordinates
 
 
-    
+    # list of parameter names for data capture
+    parameters = [vrange, div, dual, nsamp, nblock, host, port, verbose]
     with open(ofname, 'w') as output:
         output.write(f"Notes for data samples in {fname}\n")
+        output.write(f"{get_date()}")
+        output.write(f"{get_date(utc=True)}")
         output.write(f"Sampling was started at (unix): {start}\n")
         output.write(f"Sampling was completed at (unix): {finish}\n")
         output.write(f"Dat capture took: {finish - start} seconds\n")
@@ -91,19 +122,32 @@ def tag_data(fname, start, finish):
         output.write(f"Latitude: {lat}\n")
         output.write(f"Longitude: {longi}\n")
         output.write(f"Country: {ctry}\n")
-        output.write(f"City: {cty}\n")
+        output.write(f"City: {cty}\n\n")
+        output.write(f"Paramters for Data Capture\n")
+        for i in len(params):
+            output.write(f"{parameters[i]}: {params[i]}\n")
+        if args.latitude:
+            output.write(f"User input latitude: {args.latitude}\n")
+        if args.longitude:
+            output.write(f"User input longitude: {args.longitude}\n")
+        if args.azimuth:
+            output.write(f"User input azimuth: {args.azimuth}\n")
+        if args.altitude:
+            output.write(f"User input altitude: {args.altitude}\n") 
         output.write('\neof\n')
-        
+
+    # tag file written    
     print(f"tag file written to {ofname}")
     
 
 def average_data():
-    '''averages data into a single average file'''
+    '''Average data into a single average file'''
     # import average data code
     
-def transform():
-    '''transforms coordinates'''
+def transform(latitude, longitude):
+    '''Transform coordinates'''
     # need rotation matrix stuff
+    c = SkyCoord(latitude, longitude, unit=u.deg)
 
 def get_time(jd=None, unix=None):
    '''Return (current) time, in seconds since the Epoch (00:00:00 
@@ -126,7 +170,7 @@ def get_time(jd=None, unix=None):
    if jd is None:
        t = time.time()
        return t
-    
+       
    elif unix is None:
        t = at.Time(jd, format='jd')
        return t.unix
@@ -135,6 +179,27 @@ def get_time(jd=None, unix=None):
        t = at.Time(unix, format='unix')
        return t.jd
 
+def get_utc():
+    utc = 0
+    return utc
+
+def get_lst():
+    lst = 0
+    return lst
+
+def get_date(utc=False):
+    if utc:
+        date = subprocess.Popen(["date",  "-u"], stdout=subprocess.PIPE)
+        (date, err) = date.communicate()
+        date_text = date.decode("utf-8").rstrip()
+        return date_text
+    else:
+        date = subprocess.Popen(["date"], stdout=subprocess.PIPE)
+        (date, err) = date.communicate()
+        date_text = date.decode("utf-8").rstrip()
+        return date_text
+
+        
    
 # main program implemented as boiler plate logic
 if __name__ == "__main__":
@@ -147,26 +212,43 @@ if __name__ == "__main__":
    import numpy as np
    import scipy as sp
    import ugradio
-   import astropy
+   import astropy.time as at
+   from astropy.coordinates import SkyCoord
+   from astropy.coordinates import EarthLocation
+   from astropy.coordinates import AltAz
+   from astropy import units as u
+   from astropy.time import Time
    import matplotlib.pyplot as plt
    import traceback
    import time
 
+   # nch location
+   nch = EarthLocation(lat="37.8732", lon="-122.2573", height=123.1*u.m)
+   
    # argparse stuff
-   parser = argparse.ArgumentParser(description='program to capture data via digital sampling')
+   parser = argparse.ArgumentParser(description='''Program used to capture data via digital sampling''')
    parser.add_argument('-v', "--verbose", action="store_true", help="displays numerical quantities to high precision")
    parser.add_argument('-vr', "--volts", action="store_true", help="shows volt range options")
-   parser.add_argument('-lt', "--lat", action="store_true", help="takes in latitude")
-   parser.add_argument('-lg', "--long", action="store_true", help="takes in longitude")
+   parser.add_argument('-lt', "--lat", type=float, help="[float] takes in latitude")
+   parser.add_argument('-lg', "--long", type=float, help="[float] takes in longitude")
+   parser.add_argument('-az', "--azimuth", type=float, help="[float] take in azimuth")
+   parser.add_argument('-alt', "--altitude", type=float, help="[float] take in altitude")
    parser.add_argument('-c', "--capture", action="store_true", help="captures data")
-   parser.add_argument('-d', "--directory", action="store_true", help="write data to new directory")
-   parser.add_argument('-n', "--nsamples", action="store_true", help="sets the number of blocks to take")
+   parser.add_argument('-d', "--directory", type=str, help="[string] write data to new directory")
+   parser.add_argument('-ns', "--numsamples", type=int, help="[int] sets the number of samples to take")
+   parser.add_argument('-nb', "--numblocks", type=int, help="[int] sets the number of blocks to take")
+   parser.add_argument('-div', "--divisor", type=int, help="[int] sets the divisor (sample rate)")
+   parser.add_argument('-sr', "--srate", type=int, help="[int] returns what the sample rate would be (base_rate/input)")
    parser.add_argument('-t', "--time", action="store_true", help="prints out the current unix time")
    args = parser.parse_args()
 
    '''print time if toggled'''
    if args.time:
       print(f"The current unix time is: {get_time()}")
+
+   if args.srate:
+      base_rate = 62.5e6
+      print(f"The sample rate would be {base_rate/args.srate:2.5e} Hz")
 
       
    '''print volt_range options'''
@@ -180,7 +262,11 @@ if __name__ == "__main__":
        # add multi-block data capabilities
        
        try:
-           capture()
+           if args.nsamples:
+               for i in range(args.nsamples):
+                   capture()
+           else:
+               capture()
            
        except Exception:
            print("[[AN ERROR OCCURED]]")
@@ -197,7 +283,13 @@ else:
    import numpy as np
    import scipy as sp
    import ugradio
-   import astropy
+   import astropy.time as at
+   from astropy.coordinates import SkyCoord
+   from astropy.coordinates import EarthLocation
+   from astropy.coordinates import AltAz
+   from astropy import units as u
+   from astropy.time import Time
    import matplotlib.pyplot as plt
    import traceback
    import time
+
