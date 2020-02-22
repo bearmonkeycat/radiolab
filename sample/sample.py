@@ -121,6 +121,7 @@ if __name__ == "__main__":
    import ugradio
    import astropy
    import matplotlib.pyplot as plt
+   import traceback
 
    # argparse stuff
    parser = argparse.ArgumentParser(description='program to capture data via digital sampling')
@@ -144,8 +145,8 @@ if __name__ == "__main__":
        try:
            capture()
            
-       except Exception as e:
+       except:
            print("[[AN ERROR OCCURED]]")
-           print(e)
+           traceback.print_exception()
            sys.exit(1)
 
