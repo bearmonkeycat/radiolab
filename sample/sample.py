@@ -6,9 +6,13 @@ import matplotlib.pyplot as plt
 import astropy
 import astropy.time as at
 import ugradio
+import time
 # program to capture data via digital sampling
 # kyle miller, gpl-licensed
 #
+
+
+
 
 # functions used in the program
 def capture(volt_range, divisor=1, dual_mode=False, nsampes=16000, nblocks=1, host='10.32.92.95', port=1340, verbose=False, file_name=None):
@@ -60,22 +64,23 @@ def get_time(jd=None, unix=None):
     -------
     time : float, seconds since the Epoch or jd of unix time'''
 
-    if jd is None:
-        time = time.time()
-        return time
+   if jd is None:
+       t = time.time()
+       return t
     
-    else if unix is None:
-        time = at.Time(jd, format='jd')
-        return time.unix
+   elif unix is None:
+       t = at.Time(jd, format='jd')
+       return t.unix
     
-    else:
-        time = at.Time(unix, format='unix')
-        return time.jd
+   else:
+       t = at.Time(unix, format='unix')
+       return t.jd
 
    
 # main program implemented as boiler plate logic
 if __name__ == "__main__":
    from sys import argv
+   import sys
    import subprocess
    import re
    import argparse
@@ -96,15 +101,19 @@ if __name__ == "__main__":
    parser.add_argument('-t', "--time", action="store_true", help="prints out the current time in various ways")
    args = parser.parse_args()
 
+   '''print time if toggled'''
    if args.time:
-      get_time()
+      print(f"The current unix time is: {get_time()}")
+      
 
       
-   '''fetch network node hostname'''
-   try:
-      hostname = getInfo("/etc/hostname")
-      print(f"hostname: {hostname}\n")
-
-   except:
-      pass
+   '''capture data if toggled'''
+   if args.capture:
+       
+       try:
+           capture()
+           
+       except:
+           print("error occured while trying to capture data")
+           sys.exit(1)
 
