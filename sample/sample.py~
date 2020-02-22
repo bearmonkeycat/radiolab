@@ -1,0 +1,17 @@
+import argv
+import argparse
+import numpy as np
+import scipy as sp
+import matplotlib.pyplot as plt
+import astropy
+import ugradio
+
+# program to capture data via digital sampling
+
+def capture():
+    '''caputures raw data from pico sampler'''
+
+def average_data():
+
+
+def transform():
