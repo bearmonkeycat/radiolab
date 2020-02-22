@@ -1,16 +1,5 @@
-import argparse
-import subprocess
-from sys import argv
-import numpy as np
-import scipy as sp
-import matplotlib.pyplot as plt
-import astropy
-import astropy.time as at
-import ugradio
-import time
-import re
 # program to capture data via digital sampling
-# kyle miller, gpl-licensed
+# kyle miller, gpl-3.0-licensed
 #
 
 
@@ -39,19 +28,19 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1,
     raw_data = ugradio.pico.capture_data(vrange, div, dual, nsamp, nblock, host, port, verbose)
     finish = get_time()
     print("data capture finished")
-    print(f"data written to {file_name}")
     tag_data(file_name, start, finish)
     np.savetxt(file_name, raw_data)
-    
+    print(f"data written to {file_name}")
+
 
 
     
 def tag_data(fname, start, finish):
-    '''tags data with a text file containing time/data information'''
+    '''Tags data capture with a text file containing time/data/location information'''
     # make file name
     fname = "tagfile-" + fname
     
-    # get ip address and geolocation (lat and long)
+    # get ip address and geolocation (lat, long, etc.)
     ip = subprocess.Popen(["curl",  "-s", "https://ipinfo.io/ip"], stdout=subprocess.PIPE)
     (ip_address, err) = ip.communicate()
     ip_address_text = ip_address.decode("utf-8").rstrip()
@@ -59,12 +48,30 @@ def tag_data(fname, start, finish):
     loc = subprocess.Popen(["curl", "-s", lookup], stdout=subprocess.PIPE)
     (location_information, err) = loc.communicate()
     loc_info = location_information.decode("utf-8")
+    
     lat_find = re.search(r'\<latitude>[\s\S]*?<\/latitude>', loc_info)
     latitude = lat_find.group()
     lat = re.sub('<[^<]+>', "", latitude)
+    
     long_find = re.search(r'\<longitude>[\s\S]*?<\/longitude>', loc_info)
     longitude = long_find.group()
     longi = re.sub('<[^<]+>', "", longitude)    
+    
+    isp_find = re.search(r'\<isp>[\s\S]*?<\/isp>', loc_info)
+    internet_service_provider = isp_find.group()
+    isp = re.sub('<[^<]+>', "", internet_service_provider)
+
+    city_find = re.search(r'\<city>[\s\S]*?<\/city>', loc_info)
+    city = city_find.group()
+    cty = re.sub('<[^<]+>', "", city)
+
+    country_find = re.search(r'\<countryname>[\s\S]*?<\/countryname>', loc_info)
+    country = country_find.group()
+    ctry = re.sub('<[^<]+>', "", country)
+
+    # convert lat long to astronical coordinates
+
+
     
     with open(fname, 'w') as output:
         output.write(f"Notes for data samples in {fname}\n")
@@ -72,8 +79,11 @@ def tag_data(fname, start, finish):
         output.write(f"Sampling was completed at: {finish}\n")
         output.write(f"Julian date of sample: {get_time(unix=start)}\n")
         output.write(f"IP address of computer sampling: {ip_address_text}\n")
+        output.write(f"ISP used for internet access: {isp}\n")
         output.write(f"Latitude: {lat}\n")
         output.write(f"Longitude: {longi}\n")
+        output.write(f"Country: {ctry}\n")
+        output.write(f"City: {cty}\n")
         output.write('\neof\n')
         
     print(f"tag file written to {fname}")
@@ -90,7 +100,7 @@ def get_time(jd=None, unix=None):
    '''Return (current) time, in seconds since the Epoch (00:00:00 
     Coordinated Universal Time (UTC), Thursday, 1 January 1970).
     Note: unix time will be upgraded soon from 32bit to 64bit.
-    This is the default.
+    Unix time is the default output; however,
 
     If jd is entered, unix time will be returned.
     If unix is entered, jd will be returned.
@@ -159,3 +169,16 @@ if __name__ == "__main__":
            traceback.print_exc()
            sys.exit(1)
 
+else:
+   from sys import argv
+   import sys
+   import subprocess
+   import re
+   import argparse
+   import pprint
+   import numpy as np
+   import scipy as sp
+   import ugradio
+   import astropy
+   import matplotlib.pyplot as plt
+   import traceback
