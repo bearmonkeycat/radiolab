@@ -110,11 +110,11 @@ def tag_data(fname, start, finish, params):
     # list of parameter names for data capture
     parameters = ['vrange', 'div', 'dual', 'nsamp', 'nblock', 'host', 'port', 'verbose']
     with open(ofname, 'w') as output:
-        output.write(f"Notes for data samples in {fname}\n")
+        output.write(f"\n[[METADATA FOR DATA SAMPLES IN {fname}]]\n")
 
         # write out internet metadata
-        output.write(f"{get_date()}")
-        output.write(f"{get_date(utc=True)}")
+        output.write(f"{get_date()}\n")
+        output.write(f"{get_date(utc=True)}\n")
         output.write(f"Sampling was started at (unix): {start}\n")
         output.write(f"Sampling was completed at (unix): {finish}\n")
         output.write(f"Dat capture took: {finish - start} seconds\n")
@@ -127,12 +127,12 @@ def tag_data(fname, start, finish, params):
         output.write(f"City: {cty}\n\n")
 
         # write out parameters used
-        output.write(f"Paramters for Data Capture\n")
+        output.write(f"[[PARAMETERS FROM DATA CAPTURE]]\n")
         for i in range(len(params)):
             output.write(f"{parameters[i]}: {params[i]}\n")
 
         # write out location information
-        output.write(f"\nLocation Information\n")
+        output.write(f"\n[[LOCATION INFORMATION]]\n")
         if args.lat:
             output.write(f"User input latitude: {args.lat}\n")
         if args.lon:
@@ -145,7 +145,7 @@ def tag_data(fname, start, finish, params):
             output.write(f"Location was set to lat[{location.lat}] lon[{location.lon}]")
 
         # make room for lab notes
-        output.write("\n\n[[Lab Notes Section]]\n")
+        output.write("\n\n[[LAB NOTES]]\n")
         output.write("Vpp: \n")
         output.write("First LO power: \n")
         output.write("Second LO power: \n")
