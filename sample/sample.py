@@ -133,10 +133,10 @@ def tag_data(fname, start, finish, params):
 
         # write out location information
         output.write(f"\nLocation Information\n")
-        if args.latitude:
-            output.write(f"User input latitude: {args.latitude}\n")
-        if args.longitude:
-            output.write(f"User input longitude: {args.longitude}\n")
+        if args.lat:
+            output.write(f"User input latitude: {args.lat}\n")
+        if args.lon:
+            output.write(f"User input longitude: {args.lon}\n")
         if args.azimuth:
             output.write(f"User input azimuth: {args.azimuth}\n")
         if args.altitude:
