@@ -20,7 +20,7 @@ division = 1 # 5 will turn 62.5 MHz sample rate into 12.5 MHz sample rate
 mode = True
 
 # capture data and write to file (will repeat N times)
-N = 3
-for i in range(11):
+N = 1000
+for i in range(N):
     data = ugradio.pico.capture_data(vrange, 1, dual_mode=mode)
     np.savetxt(f'output-calibrate-{i}', data)
