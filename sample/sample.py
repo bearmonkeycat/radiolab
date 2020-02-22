@@ -105,12 +105,14 @@ def tag_data(fname, start, finish, params):
     ctry = re.sub('<[^<]+>', "", country)
 
     # convert lat long to astronomical coordinates
-
+    # location = location
 
     # list of parameter names for data capture
     parameters = [vrange, div, dual, nsamp, nblock, host, port, verbose]
     with open(ofname, 'w') as output:
         output.write(f"Notes for data samples in {fname}\n")
+
+        # write out internet metadata
         output.write(f"{get_date()}")
         output.write(f"{get_date(utc=True)}")
         output.write(f"Sampling was started at (unix): {start}\n")
@@ -123,9 +125,14 @@ def tag_data(fname, start, finish, params):
         output.write(f"Longitude: {longi}\n")
         output.write(f"Country: {ctry}\n")
         output.write(f"City: {cty}\n\n")
+
+        # write out parameters used
         output.write(f"Paramters for Data Capture\n")
         for i in len(params):
             output.write(f"{parameters[i]}: {params[i]}\n")
+
+        # write out location information
+        output.write(f"\nLocation Information\n")
         if args.latitude:
             output.write(f"User input latitude: {args.latitude}\n")
         if args.longitude:
@@ -133,7 +140,16 @@ def tag_data(fname, start, finish, params):
         if args.azimuth:
             output.write(f"User input azimuth: {args.azimuth}\n")
         if args.altitude:
-            output.write(f"User input altitude: {args.altitude}\n") 
+            output.write(f"User input altitude: {args.altitude}\n")
+        if location is not None:
+            output.write(f"Location was set to lat[{location.lat}] lon[{location.lon}]")
+
+        # make room for lab notes
+        output.write("\n\n[[Lab Notes Section]]\n")
+        output.write("Vpp: \n")
+        output.write("First LO power: \n")
+        output.write("Second LO power: \n")
+        output.write("Low-pass filter: \n\n\n")
         output.write('\neof\n')
 
     # tag file written    
@@ -180,7 +196,7 @@ def get_time(jd=None, unix=None):
        return t.jd
 
 def get_utc():
-    utc = 0
+    utc = Time.now()
     return utc
 
 def get_lst():
@@ -229,8 +245,9 @@ if __name__ == "__main__":
    parser = argparse.ArgumentParser(description='''Program used to capture data via digital sampling''')
    parser.add_argument('-v', "--verbose", action="store_true", help="displays numerical quantities to high precision")
    parser.add_argument('-vr', "--volts", action="store_true", help="shows volt range options")
+   parser.add_argument('-loc', "--location", type=str, help="[string] enter location instead of lat, lon. Format: 'address, city, state', e.g., 'University Dr., Berkeley, CA'")
    parser.add_argument('-lt', "--lat", type=float, help="[float] takes in latitude")
-   parser.add_argument('-lg', "--long", type=float, help="[float] takes in longitude")
+   parser.add_argument('-lg', "--lon", type=float, help="[float] takes in longitude")
    parser.add_argument('-az', "--azimuth", type=float, help="[float] take in azimuth")
    parser.add_argument('-alt', "--altitude", type=float, help="[float] take in altitude")
    parser.add_argument('-c', "--capture", action="store_true", help="captures data")
@@ -239,28 +256,38 @@ if __name__ == "__main__":
    parser.add_argument('-nb', "--numblocks", type=int, help="[int] sets the number of blocks to take")
    parser.add_argument('-div', "--divisor", type=int, help="[int] sets the divisor (sample rate)")
    parser.add_argument('-sr', "--srate", type=int, help="[int] returns what the sample rate would be (base_rate/input)")
-   parser.add_argument('-t', "--time", action="store_true", help="prints out the current unix time")
+   parser.add_argument('-t', "--time", action="store_true", help="prints the current time. Unix, utc, and local system time.")
    args = parser.parse_args()
 
    '''print time if toggled'''
    if args.time:
       print(f"The current unix time is: {get_time()}")
+      print(f"The current UTC time is: {get_utc()}")
+      print(f"The current local system time is: {get_date()}")
 
+   '''return what the sample rate would be'''
    if args.srate:
       base_rate = 62.5e6
       print(f"The sample rate would be {base_rate/args.srate:2.5e} Hz")
 
-      
    '''print volt_range options'''
    if args.volts:
       print("['50mV', '100mV', '200mV', '500mV', '1V', '2V', '5V', '10V', '20V']")
       
 
+   '''set location if location is toggled'''
+   if args.location:
+       try:
+           location = EarthLocation.of_address(args.location)
+           print(f"Location set to lat[{location.lat}] lon[{location.lon}]")
+       except:
+           print("[[LOCATION LOOKUP ERROR]]")
+           sys.exit(1)
+   else:
+       location = None
 
    '''capture data if toggled'''
    if args.capture:
-       # add multi-block data capabilities
-       
        try:
            if args.nsamples:
                for i in range(args.nsamples):
@@ -269,7 +296,7 @@ if __name__ == "__main__":
                capture()
            
        except Exception:
-           print("[[AN ERROR OCCURED]]")
+           print("[[DATA CAPTURE ERROR]]")
            traceback.print_exc()
            sys.exit(1)
 
