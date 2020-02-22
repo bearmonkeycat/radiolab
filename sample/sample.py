@@ -61,14 +61,14 @@ def tag_data(fname, start, finish):
     
     
     with open(fname, 'w') as output:
-        output.write(f"Notes for data samples in {fname}")
-        output.write(f"Sampling was started at: {start}")
-        output.write(f"Sampling was completed at: {finish}")
-        output.write(f"Julian date of sample: {get_time(unix=start)}")
-        output.write(f"ip address of computer sampling: {ip_address_text}")
-        output.write(f"Location Information:")
+        output.write(f"Notes for data samples in {fname}\n")
+        output.write(f"Sampling was started at: {start}\n")
+        output.write(f"Sampling was completed at: {finish}\n")
+        output.write(f"Julian date of sample: {get_time(unix=start)}\n")
+        output.write(f"ip address of computer sampling: {ip_address_text}\n")
+        output.write(f"Location Information:\n")
         output.write(loc_info)
-    print("tag file written to {fname}")
+    print(f"tag file written to {fname}")
     
 
 def average_data():
