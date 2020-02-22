@@ -155,10 +155,6 @@ def tag_data(fname, start, finish, params):
     # tag file written    
     print(f"tag file written to {ofname}")
     
-
-def average_data():
-    '''Average data into a single average file'''
-    # import average data code
     
 def transform(latitude, longitude):
     '''Transform coordinates'''
@@ -289,8 +285,8 @@ if __name__ == "__main__":
    '''capture data if toggled'''
    if args.capture:
        try:
-           if args.nsamples:
-               for i in range(args.nsamples):
+           if args.numsamples:
+               for i in range(args.numsamples):
                    capture()
            else:
                capture()
