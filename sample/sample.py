@@ -22,7 +22,7 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1,
     verbose = verbose
 
     if file_name is None:
-        file_name = str(get_time(unix=time.time())) + "jd"
+        file_name = str(get_time(unix=get_time()) + "jd"
 
     start = get_time()
     raw_data = ugradio.pico.capture_data(vrange, div, dual, nsamp, nblock, host, port, verbose)
