@@ -58,17 +58,21 @@ def tag_data(fname, start, finish):
     loc = subprocess.Popen(["curl", "-s", lookup], stdout=subprocess.PIPE)
     (location_information, err) = loc.communicate()
     loc_info = location_information.decode("utf-8")
-    print(loc_info)
-    
+    lat_find = re.search(r'\<latitude>[\s\S]*?<\/latitude>', loc_info)
+    latitude = lat_find.group()
+    lat = re.sub('<[^<]+>', "", latitude)
+    long_find = re.search(r'\<longitude>[\s\S]*?<\/longitude>', loc_info)
+    longitude = long_find.group()
+    longi = re.sub('<[^<]+>', "", longitude)    
     
     with open(fname, 'w') as output:
         output.write(f"Notes for data samples in {fname}\n")
         output.write(f"Sampling was started at: {start}\n")
         output.write(f"Sampling was completed at: {finish}\n")
         output.write(f"Julian date of sample: {get_time(unix=start)}\n")
-        output.write(f"ip address of computer sampling: {ip_address_text}\n")
-        output.write(f"Location Information:\n")
-        output.write(loc_info)
+        output.write(f"IP address of computer sampling: {ip_address_text}\n")
+        output.write(f"Latitude: {lat}\n")
+        output.write(f"Longitude: {longi}\n")
         output.write('\neof\n')
         
     print(f"tag file written to {fname}")
