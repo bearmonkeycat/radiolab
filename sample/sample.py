@@ -15,9 +15,13 @@ import time
 
 
 # functions used in the program
-def capture(volt_range, divisor=1, dual_mode=False, nsampes=16000, nblocks=1, host='10.32.92.95', port=1340, verbose=False, file_name=None):
+def capture(volt_range=0, divisor=1, dual_mode=False, nsampes=16000, nblocks=1, host='10.32.92.95', port=1340, verbose=False, file_name=None):
     '''caputures raw data from pico sampler'''
-    vrange = volt_range
+    # default voltage ranges from ugradio package
+    # ugradio.pico.VOLT_RANGE = ['50mV', '100mV', '200mV', '500mV', '1V', '2V', '5V', '10V', '20V']
+    voltages = ['50mV', '100mV', '200mV', '500mV', '1V', '2V', '5V', '10V', '20V']
+    vrange = voltages[volt_range]
+    
     div = divisor
     dual = dual_mode
     nsamp = nsamples
@@ -30,7 +34,6 @@ def capture(volt_range, divisor=1, dual_mode=False, nsampes=16000, nblocks=1, ho
         file_name = str(get_time(unix=time.time()))
 
     raw_data = ugradio.pico.capture_data(vrange, div, dual, nsamp, nblock, host, port, verbose)
-
     np.savetxt(raw_data, file_name)
     
 
