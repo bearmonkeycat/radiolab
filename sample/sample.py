@@ -34,9 +34,9 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1,
     if file_name is None:
         file_name = str(get_time(unix=time.time())) + "jd"
 
-    start = time.time()
+    start = get_time()
     raw_data = ugradio.pico.capture_data(vrange, div, dual, nsamp, nblock, host, port, verbose)
-    finish = time.time()
+    finish = get_time()
     print("data capture finished")
     print(f"data written to {file_name}")
     tag_data(file_name, start, finish)
@@ -63,7 +63,7 @@ def tag_data(fname, start, finish):
         output.write(f"Notes for data samples in {fname}")
         output.write(f"Sampling was started at: {start}")
         output.write(f"Sampling was completed at: {finish}")
-        output.write(f"Julian date of sample: {get_time(time.time()):d}")
+        output.write(f"Julian date of sample: {get_time(unix=start)}")
         output.write(f"ip address of computer sampling: {ip_address_text}")
         output.write(f"Location Information:")
         output.write(location_information)
