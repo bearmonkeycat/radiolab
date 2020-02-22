@@ -55,7 +55,7 @@ def tag_data(fname, start, finish):
     ip_address_text = ip_address.decode("utf-8")
     lookup = f"http://api.geoiplookup.net/?query={ip_address_text}"
     loc = subprocess.Popen(["curl", "-s", lookup], stdout=subprocess.PIPE)
-    (location_information, err) = loc.communicate
+    (location_information, err) = loc.communicate()
     
     
     with open(fname, 'w') as ouput:
