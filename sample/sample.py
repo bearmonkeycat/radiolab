@@ -108,7 +108,7 @@ def tag_data(fname, start, finish, params):
     # location = location
 
     # list of parameter names for data capture
-    parameters = [vrange, div, dual, nsamp, nblock, host, port, verbose]
+    parameters = ['vrange', 'div', 'dual', 'nsamp', 'nblock', 'host', 'port', 'verbose']
     with open(ofname, 'w') as output:
         output.write(f"Notes for data samples in {fname}\n")
 
