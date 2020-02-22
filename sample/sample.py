@@ -57,6 +57,7 @@ def tag_data(fname, start, finish):
     lookup = f"http://api.geoiplookup.net/?query={ip_address_text}"
     loc = subprocess.Popen(["curl", "-s", lookup], stdout=subprocess.PIPE)
     (location_information, err) = loc.communicate()
+    loc_info = location_information.decode("utf-8")
     
     
     with open(fname, 'w') as output:
@@ -66,7 +67,7 @@ def tag_data(fname, start, finish):
         output.write(f"Julian date of sample: {get_time(unix=start)}")
         output.write(f"ip address of computer sampling: {ip_address_text}")
         output.write(f"Location Information:")
-        output.write(location_information)
+        output.write(loc_info)
     print("tag file written to {fname}")
     
 
