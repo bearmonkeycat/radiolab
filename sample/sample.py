@@ -94,7 +94,7 @@ def tag_data(fname, start, finish):
         output.write(f"City: {cty}\n")
         output.write('\neof\n')
         
-    print(f"tag file written to {fname}")
+    print(f"tag file written to {ofname}")
     
 
 def average_data():
@@ -155,16 +155,23 @@ if __name__ == "__main__":
    # argparse stuff
    parser = argparse.ArgumentParser(description='program to capture data via digital sampling')
    parser.add_argument('-v', "--verbose", action="store_true", help="displays numerical quantities to high precision")
-   parser.add_argument('-lat', "--lat", action="store_true", help="takes in latitude")
-   parser.add_argument('-long', "--long", action="store_true", help="takes in longitude")
+   parser.add_argument('-vr', "--volts", action="store_true", help="shows volt range options")
+   parser.add_argument('-lt', "--lat", action="store_true", help="takes in latitude")
+   parser.add_argument('-lg', "--long", action="store_true", help="takes in longitude")
    parser.add_argument('-c', "--capture", action="store_true", help="captures data")
-   parser.add_argument('-nsamples', "--nsamples", action="store_true", help="sets the number of blocks to take")
-   parser.add_argument('-t', "--time", action="store_true", help="prints out the current time in various ways")
+   parser.add_argument('-d', "--directory", action="store_true", help="write data to new directory")
+   parser.add_argument('-n', "--nsamples", action="store_true", help="sets the number of blocks to take")
+   parser.add_argument('-t', "--time", action="store_true", help="prints out the current unix time")
    args = parser.parse_args()
 
    '''print time if toggled'''
    if args.time:
       print(f"The current unix time is: {get_time()}")
+
+      
+   '''print volt_range options'''
+   if args.volts:
+      print("['50mV', '100mV', '200mV', '500mV', '1V', '2V', '5V', '10V', '20V']")
       
 
 
