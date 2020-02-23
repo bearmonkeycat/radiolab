@@ -73,43 +73,50 @@ def tag_data(fname, start, finish, params):
 
     if args.directory:
         ofname = "./" + args.directory + "/" + ofname
-    
-    # get ip address
-    ip = subprocess.Popen(["curl",  "-s", "https://ipinfo.io/ip"], stdout=subprocess.PIPE)
-    (ip_address, err) = ip.communicate()
-    ip_address_text = ip_address.decode("utf-8").rstrip()
 
-    # get location information
-    lookup = f"http://api.geoiplookup.net/?query={ip_address_text}"
-    loc = subprocess.Popen(["curl", "-s", lookup], stdout=subprocess.PIPE)
-    (location_information, err) = loc.communicate()
-    loc_info = location_information.decode("utf-8")
+    # try to get internet information with curl
+    iinfo=True
+    try:
+        # get ip address
+        ip = subprocess.Popen(["curl",  "-s", "https://ipinfo.io/ip"], stdout=subprocess.PIPE)
+        (ip_address, err) = ip.communicate()
+        ip_address_text = ip_address.decode("utf-8").rstrip()
 
-    # parse latitude
-    lat_find = re.search(r'\<latitude>[\s\S]*?<\/latitude>', loc_info)
-    latitude = lat_find.group()
-    lat = re.sub('<[^<]+>', "", latitude)
+        # get location information
+        lookup = f"http://api.geoiplookup.net/?query={ip_address_text}"
+        loc = subprocess.Popen(["curl", "-s", lookup], stdout=subprocess.PIPE)
+        (location_information, err) = loc.communicate()
+        loc_info = location_information.decode("utf-8")
 
-    # parse longitude
-    long_find = re.search(r'\<longitude>[\s\S]*?<\/longitude>', loc_info)
-    longitude = long_find.group()
-    longi = re.sub('<[^<]+>', "", longitude)    
+        # parse latitude
+        lat_find = re.search(r'\<latitude>[\s\S]*?<\/latitude>', loc_info)
+        latitude = lat_find.group()
+        lat = re.sub('<[^<]+>', "", latitude)
 
-    # parse isp
-    isp_find = re.search(r'\<isp>[\s\S]*?<\/isp>', loc_info)
-    internet_service_provider = isp_find.group()
-    isp = re.sub('<[^<]+>', "", internet_service_provider)
+        # parse longitude
+        long_find = re.search(r'\<longitude>[\s\S]*?<\/longitude>', loc_info)
+        longitude = long_find.group()
+        longi = re.sub('<[^<]+>', "", longitude)    
 
-    # parse city
-    city_find = re.search(r'\<city>[\s\S]*?<\/city>', loc_info)
-    city = city_find.group()
-    cty = re.sub('<[^<]+>', "", city)
+        # parse isp
+        isp_find = re.search(r'\<isp>[\s\S]*?<\/isp>', loc_info)
+        internet_service_provider = isp_find.group()
+        isp = re.sub('<[^<]+>', "", internet_service_provider)
 
-    # parse country
-    country_find = re.search(r'\<countryname>[\s\S]*?<\/countryname>', loc_info)
-    country = country_find.group()
-    ctry = re.sub('<[^<]+>', "", country)
+        # parse city
+        city_find = re.search(r'\<city>[\s\S]*?<\/city>', loc_info)
+        city = city_find.group()
+        cty = re.sub('<[^<]+>', "", city)
 
+        # parse country
+        country_find = re.search(r'\<countryname>[\s\S]*?<\/countryname>', loc_info)
+        country = country_find.group()
+        ctry = re.sub('<[^<]+>', "", country)
+
+    except:
+        iinfo = False
+        print("[[ERROR GETTING INTERNET INFORMATION]]")
+        
     # convert lat long to astronomical coordinates
     # location = location
 
@@ -123,14 +130,15 @@ def tag_data(fname, start, finish, params):
         output.write(f"{get_date(utc=True)}\n")
         output.write(f"Sampling was started at (unix): {start}\n")
         output.write(f"Sampling was completed at (unix): {finish}\n")
-        output.write(f"Dat capture took: {finish - start} seconds\n")
+        output.write(f"Data capture took: {finish - start} seconds\n")
         output.write(f"Julian date of sample: {get_time(unix=start)}\n")
-        output.write(f"IP address of computer sampling: {ip_address_text}\n")
-        output.write(f"ISP used for internet access: {isp}\n")
-        output.write(f"Latitude: {lat}\n")
-        output.write(f"Longitude: {longi}\n")
-        output.write(f"Country: {ctry}\n")
-        output.write(f"City: {cty}\n\n")
+        if iinfo:
+            output.write(f"IP address of computer sampling: {ip_address_text}\n")
+            output.write(f"ISP used for internet access: {isp}\n")
+            output.write(f"Latitude: {lat}\n")
+            output.write(f"Longitude: {longi}\n")
+            output.write(f"Country: {ctry}\n")
+            output.write(f"City: {cty}\n\n")
 
         # write out parameters used
         output.write(f"[[PARAMETERS FROM DATA CAPTURE]]\n")
@@ -303,6 +311,9 @@ if __name__ == "__main__":
            traceback.print_exc()
            sys.exit(1)
 
+
+           
+# import all dependancies if imported as a module
 else:
    from sys import argv
    import sys
