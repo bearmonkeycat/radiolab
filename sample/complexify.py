@@ -56,8 +56,8 @@ fourier_diff[0] = 0
 
 # plot results
 #plt.plot(np.fft.fftshift(fourier_axis_hearton), np.abs(np.fft.fftshift(fourier_hearton))**2, label="heart nebula on")
-#plt.plot(np.fft.fftshift(fourier_axis_heartoff), np.abs(np.fft.fftshift(fourier_heartoff))**2, label="heart nebula off")
-plt.plot(np.fft.fftshift(fourier_axis_diff), np.abs(np.fft.fftshift(fourier_diff))**2, label="Filtered Spectrum")
+#plt.plot(np.fft.fftshift(fourier_axis_heartoff), np.abs(np.fft.fftshift(fourie_heartoff))**2, label="heart nebula off")
+plt.plot(np.fft.fftshift(fourier_axis_diff)[2000:-2000], np.abs(np.fft.fftshift(fourier_diff)[2000:-2000])**2, label="Filtered Spectrum")
 
 #plt.yscale('log')
 plt.ylabel('Intensity ~W/Hz')

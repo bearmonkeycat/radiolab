@@ -267,6 +267,7 @@ if __name__ == "__main__":
    parser.add_argument('-d', "--directory", type=str, help="[string] write data to new directory")
    parser.add_argument('-ns', "--numsamples", type=int, help="[int] sets the number of samples to take")
    parser.add_argument('-nb', "--numblocks", type=int, help="[int] sets the number of blocks to take")
+   parser.add_argument('-f', "--fast", type="store_true", help="flag to take more blocks than one at a time (makes the capture process quicker)")
    parser.add_argument('-div', "--divisor", type=int, help="[int] sets the divisor (sample rate)")
    parser.add_argument('-sr', "--srate", type=int, help="[int] returns what the sample rate would be (base_rate/input)")
    parser.add_argument('-t', "--time", action="store_true", help="prints the current time. Unix, utc, and local system time.")
@@ -303,8 +304,11 @@ if __name__ == "__main__":
    if args.capture:
        try:
            if args.numsamples:
-               for i in range(args.numsamples):
-                   capture()
+               if args.fast:
+                   capture(nblocks=args.numsamples)
+               else:
+                   for i in range(args.numsamples):
+                       capture()
            else:
                capture()
            
