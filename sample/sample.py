@@ -28,8 +28,10 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1,
     # default voltage ranges from ugradio package:: ugradio.pico.VOLT_RANGE
     voltages = ['50mV', '100mV', '200mV', '500mV', '1V', '2V', '5V', '10V', '20V']
     vrange = voltages[volt_range]
-    div = divisor
-    dual = dual_mode
+    #div = divisor
+    div = 12
+    #dual = dual_mode
+    dual = True
     nsamp = nsamples
     nblock = nblocks
     host = host
