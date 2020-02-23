@@ -1,0 +1,37 @@
+
+[[METADATA FOR DATA SAMPLES IN 1582427196.6954958jd]]
+Sat Feb 22 19:06:48 PST 2020
+Sun Feb 23 03:06:48 UTC 2020
+Sampling was started at (unix): 1582427196.6955266
+Sampling was completed at (unix): 1582427197.208967
+Data capture took: 0.5134403705596924 seconds
+Julian date of sample: 1582427208.843484
+IP address of computer sampling: 136.152.226.202
+ISP used for internet access: University of California at Berkeley
+Latitude: 37.8682
+Longitude: -122.2865
+Country: United States
+City: Berkeley
+
+[[PARAMETERS FROM DATA CAPTURE]]
+vrange: 50mV
+div: 12
+dual: True
+nsamp: 16000
+nblock: 1
+host: 10.32.92.95
+port: 1340
+verbose: False
+
+[[LOCATION INFORMATION]]
+Location was set to lat[37.873840200000004 deg] lon[-122.25543989999998 deg]
+
+[[LAB NOTES]]
+Vpp: 
+First LO power: 
+Second LO power: 
+Low-pass filter: 
+
+
+
+eof
