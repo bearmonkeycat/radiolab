@@ -1,0 +1,30 @@
+
+[[METADATA FOR DATA SAMPLES IN 1582521612.835842jd]]
+Sun Feb 23 21:20:13 PST 2020
+Mon Feb 24 05:20:13 UTC 2020
+Sampling was started at (unix): 1582521613.0240798
+Sampling was completed at (unix): 1582521613.8820524
+Data capture took: 0.8579726219177246 seconds
+Julian date of sample: 1582521613.909837
+[[PARAMETERS FROM DATA CAPTURE]]
+vrange: 50mV
+div: 1
+dual: True
+nsamp: 16000
+nblock: 25
+host: 10.32.92.95
+port: 1340
+verbose: False
+
+[[LOCATION INFORMATION]]
+Location was set to lat[37.873840200000004 deg] lon[-122.25543989999998 deg]
+
+[[LAB NOTES]]
+Vpp: 
+First LO power: 
+Second LO power: 
+Low-pass filter: 
+
+
+
+eof

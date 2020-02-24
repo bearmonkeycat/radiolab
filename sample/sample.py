@@ -29,7 +29,7 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1,
     voltages = ['50mV', '100mV', '200mV', '500mV', '1V', '2V', '5V', '10V', '20V']
     vrange = voltages[volt_range]
     #div = divisor
-    div = 12
+    div = 1
     #dual = dual_mode
     dual = True
     nsamp = nsamples
@@ -117,8 +117,10 @@ def tag_data(fname, start, finish, params):
 
     except:
         iinfo = False
-        print("[[ERROR GETTING INTERNET INFORMATION]]")
-        
+        #print("[[ERROR GETTING INTERNET INFORMATION]]")
+        pass
+
+    
     # convert lat long to astronomical coordinates
     # location = location
 
@@ -267,7 +269,7 @@ if __name__ == "__main__":
    parser.add_argument('-d', "--directory", type=str, help="[string] write data to new directory")
    parser.add_argument('-ns', "--numsamples", type=int, help="[int] sets the number of samples to take")
    parser.add_argument('-nb', "--numblocks", type=int, help="[int] sets the number of blocks to take")
-   parser.add_argument('-f', "--fast", type="store_true", help="flag to take more blocks than one at a time (makes the capture process quicker)")
+   parser.add_argument('-f', "--fast", action="store_true", help="flag to take more blocks than one at a time (makes the capture process quicker)")
    parser.add_argument('-div', "--divisor", type=int, help="[int] sets the divisor (sample rate)")
    parser.add_argument('-sr', "--srate", type=int, help="[int] returns what the sample rate would be (base_rate/input)")
    parser.add_argument('-t', "--time", action="store_true", help="prints the current time. Unix, utc, and local system time.")
@@ -303,12 +305,12 @@ if __name__ == "__main__":
    '''capture data if toggled'''
    if args.capture:
        try:
-           if args.numsamples:
+           if args.numblocks:
                if args.fast:
-                   capture(nblocks=args.numsamples)
+                   capture(nblocks=args.numblocks)
                else:
-                   for i in range(args.numsamples):
-                       capture()
+                   for i in range(args.numblocks):
+                       capture(nblocks=args.numblocks)
            else:
                capture()
            
