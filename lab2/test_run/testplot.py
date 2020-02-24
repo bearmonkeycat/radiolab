@@ -18,7 +18,7 @@ fourier_axis = np.fft.fftfreq(n=len(complex_data), d=sample_spacing)
 fourier_data[0] = 0 
 
 # plot result
-plt.plot(fourier_axis, np.abs(np.fft.fftshift(fourier_data))**2, label="Test Run")
+plt.plot(np.fft.fftshift(fourier_axis), np.abs(np.fft.fftshift(fourier_data))**2, label="Test Run")
 #plt.yscale('log')
 plt.grid()
 plt.xlabel(r'$\nu$ Hz')
