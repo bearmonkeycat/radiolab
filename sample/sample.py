@@ -29,7 +29,7 @@ def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1,
     voltages = ['50mV', '100mV', '200mV', '500mV', '1V', '2V', '5V', '10V', '20V']
     vrange = voltages[volt_range]
     #div = divisor
-    div = 1
+    div = 6
     #dual = dual_mode
     dual = True
     nsamp = nsamples
