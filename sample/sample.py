@@ -1,4 +1,23 @@
 #!/usr/bin/env python
+from sys import argv
+import sys
+import os
+import subprocess
+import re
+import argparse
+import pprint
+import numpy as np
+import scipy as sp
+import ugradio
+import astropy.time as at
+from astropy.coordinates import SkyCoord
+from astropy.coordinates import EarthLocation
+from astropy.coordinates import AltAz
+from astropy import units as u
+from astropy.time import Time
+import matplotlib.pyplot as plt
+import traceback
+import time
 """ Program to capture data via digital sampling
 
 This program is free software: you can redistribute it and/or modify it under
@@ -20,30 +39,6 @@ __license__ = "GPLv3"
 __status__ = "alpha"
 __version__ = "0.0.1"
 
-
-# functions used in the program
-def import_dependancies():
-   '''Import dependancies for the program as module/main'''
-   from sys import argv
-   import sys
-   import os
-   import subprocess
-   import re
-   import argparse
-   import pprint
-   import numpy as np
-   import scipy as sp
-   import ugradio
-   import astropy.time as at
-   from astropy.coordinates import SkyCoord
-   from astropy.coordinates import EarthLocation
-   from astropy.coordinates import AltAz
-   from astropy import units as u
-   from astropy.time import Time
-   import matplotlib.pyplot as plt
-   import traceback
-   import time
-    
 
 
 def capture(volt_range, divisor, dual_mode, nsamples, nblocks):
@@ -253,8 +248,6 @@ def get_date(utc=False):
    
 # main program implemented as boiler plate logic
 if __name__ == "__main__":
-   # import dependancies
-   import_dependancies()
 
    # nch location
    nch = EarthLocation(lat="37.8732", lon="-122.2573", height=123.1*u.m)
@@ -355,10 +348,3 @@ if __name__ == "__main__":
            print("[[DATA CAPTURE ERROR]]")
            traceback.print_exc()
            sys.exit(1)
-
-
-           
-# import all dependancies if imported as a module
-else:
-   import_dependancies()
-
