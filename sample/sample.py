@@ -22,24 +22,44 @@ __version__ = "0.0.1"
 
 
 # functions used in the program
-def capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1, host='10.32.92.95', port=1340, verbose=False, file_name=None):
+def import_dependancies():
+   '''Import dependancies for the program as module/main'''
+   from sys import argv
+   import sys
+   import os
+   import subprocess
+   import re
+   import argparse
+   import pprint
+   import numpy as np
+   import scipy as sp
+   import ugradio
+   import astropy.time as at
+   from astropy.coordinates import SkyCoord
+   from astropy.coordinates import EarthLocation
+   from astropy.coordinates import AltAz
+   from astropy import units as u
+   from astropy.time import Time
+   import matplotlib.pyplot as plt
+   import traceback
+   import time
+    
+
+
+def capture(volt_range, divisor, dual_mode, nsamples, nblocks):
     '''Caputure raw data from pico sampler'''
     # parameters for data capture
     # default voltage ranges from ugradio package:: ugradio.pico.VOLT_RANGE
-    voltages = ['50mV', '100mV', '200mV', '500mV', '1V', '2V', '5V', '10V', '20V']
-    vrange = voltages[volt_range]
-    #div = divisor
-    div = 6
-    #dual = dual_mode
-    dual = True
+    vrange = volt_range
+    div = divisor
+    dual = dual_mode
     nsamp = nsamples
     nblock = nblocks
-    host = host
-    port = port
-    verbose = verbose
-
+    host = '10.32.92.95'
+    port = 1340
+    
     # parameters in list form
-    parameters = [vrange, div, dual, nsamp, nblock, host, port, verbose]
+    parameters = [vrange, div, dual, nsamp, nblock, host, port]
 
     # logistics for storing data capture
     if file_name is None:
@@ -214,7 +234,7 @@ def get_utc():
     return utc
 
 def get_lst():
-    lst = 0
+    lst = 0 # need to implement this
     return lst
 
 def get_date(utc=False):
@@ -233,39 +253,23 @@ def get_date(utc=False):
    
 # main program implemented as boiler plate logic
 if __name__ == "__main__":
-   from sys import argv
-   import sys
-   import os
-   import subprocess
-   import re
-   import argparse
-   import pprint
-   import numpy as np
-   import scipy as sp
-   import ugradio
-   import astropy.time as at
-   from astropy.coordinates import SkyCoord
-   from astropy.coordinates import EarthLocation
-   from astropy.coordinates import AltAz
-   from astropy import units as u
-   from astropy.time import Time
-   import matplotlib.pyplot as plt
-   import traceback
-   import time
+   # import dependancies
+   import_dependancies()
 
    # nch location
    nch = EarthLocation(lat="37.8732", lon="-122.2573", height=123.1*u.m)
    
    # argparse stuff
    parser = argparse.ArgumentParser(description='''Program used to capture data via digital sampling''')
-   parser.add_argument('-v', "--verbose", action="store_true", help="displays numerical quantities to high precision")
    parser.add_argument('-vr', "--volts", action="store_true", help="shows volt range options")
+   parser.add_argument('-vrs', "--vrangeset", type=int, help="[int] pick voltage range from options (run -vr to see options)")
    parser.add_argument('-loc', "--location", type=str, help="[string] enter location instead of lat, lon. Format: 'address, city, state', e.g., 'University Dr., Berkeley, CA'")
    parser.add_argument('-lt', "--lat", type=float, help="[float] takes in latitude")
    parser.add_argument('-lg', "--lon", type=float, help="[float] takes in longitude")
    parser.add_argument('-az', "--azimuth", type=float, help="[float] take in azimuth")
    parser.add_argument('-alt', "--altitude", type=float, help="[float] take in altitude")
    parser.add_argument('-c', "--capture", action="store_true", help="captures data")
+   parser.add_argument('-dm', "--dualmode", action="store_true", help="toggles dual mode")
    parser.add_argument('-d', "--directory", type=str, help="[string] write data to new directory")
    parser.add_argument('-ns', "--numsamples", type=int, help="[int] sets the number of samples to take")
    parser.add_argument('-nb', "--numblocks", type=int, help="[int] sets the number of blocks to take")
@@ -289,8 +293,41 @@ if __name__ == "__main__":
    '''print volt_range options'''
    if args.volts:
       print("['50mV', '100mV', '200mV', '500mV', '1V', '2V', '5V', '10V', '20V']")
-      
 
+      
+   '''set up parameters for data capture'''
+   # default voltage ranges from ugradio package:: ugradio.pico.VOLT_RANGE
+   voltages = ['50mV', '100mV', '200mV', '500mV', '1V', '2V', '5V', '10V', '20V']
+   if args.vrangeset:
+       vrange = voltages[args.vrangeset]
+   else:
+       vrange = voltages[0]
+
+   # divisor to modulate the sample frquency, i.e., 62.5MHz/divisor    
+   if args.divisor:
+       div = args.divisor
+   else:
+       div = 1
+
+   # toggles dual capture mode    
+   if args.dualmode:
+       dual = True
+   else:
+       dual = False
+
+   # sets the number of samples per block
+   if args.numsamples:
+       nsamp = args.numsamples
+   else:
+       nsamp = 16000
+
+   # sets the number of blocks to capture (numsamples per block)
+   if args.numblocks:
+       nblock = args.numblocks
+   else:
+       nblock = 1
+   
+      
    '''set location if location is toggled'''
    if args.location:
        try:
@@ -307,12 +344,12 @@ if __name__ == "__main__":
        try:
            if args.numblocks:
                if args.fast:
-                   capture(nblocks=args.numblocks)
+                   capture(vrange, div, dual, nsamp, nblock)
                else:
                    for i in range(args.numblocks):
-                       capture(nblocks=args.numblocks)
+                       capture(vrange, div, dual, nsamp, nblock)
            else:
-               capture()
+               capture(vrange, div, dual, nsamp, nblock)
            
        except Exception:
            print("[[DATA CAPTURE ERROR]]")
@@ -323,23 +360,5 @@ if __name__ == "__main__":
            
 # import all dependancies if imported as a module
 else:
-   from sys import argv
-   import sys
-   import os
-   import subprocess
-   import re
-   import argparse
-   import pprint
-   import numpy as np
-   import scipy as sp
-   import ugradio
-   import astropy.time as at
-   from astropy.coordinates import SkyCoord
-   from astropy.coordinates import EarthLocation
-   from astropy.coordinates import AltAz
-   from astropy import units as u
-   from astropy.time import Time
-   import matplotlib.pyplot as plt
-   import traceback
-   import time
+   import_dependancies()
 

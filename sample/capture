@@ -1,0 +1,1 @@
+capture(volt_range=0, divisor=1, dual_mode=False, nsamples=16000, nblocks=1, host='10.32.92.95', port=1340, verbose=False, file_name=None)

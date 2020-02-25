@@ -2,118 +2,32 @@ import numpy as np
 import matplotlib.pyplot as plt
 from progress.bar import Bar
 import scipy.optimize as optimize
+import scipy.signal as signal
 
-# take in raw data
-data_hearton = np.loadtxt('avg-on')
-data_heartoff = np.loadtxt('avg-off')
-diff = data_hearton - data_heartoff
+# sample rate
+base_rate = 62.5e6
+divisor = 12
+sr = 1/(base_rate/divisor)
 
-# make complex numpy array with data
-complex_data_hearton = np.empty(16000, dtype=complex)
-complex_data_hearton.real = data_hearton[:16000]
-complex_data_hearton.imag = data_hearton[16000:]
+# take in on and off power spectra
+data_hearton = np.loadtxt('avg-pspec-heart-on')
+data_heartoff = np.loadtxt('avg-pspec-heart-off')
 
-# compute fourier transform
-fourier_hearton = np.fft.fft(complex_data_hearton)
-# sample rate is 62.5e6 Hz, spacing is inverse
-sample_spacing = 1.9200012288007864325e-7
-fourier_axis_hearton = np.fft.fftfreq(n=len(complex_data_hearton), d=sample_spacing)
-# fourier filter
-fourier_hearton[0] = 0
+diff = data_hearton/data_heartoff
+axis_diff = np.fft.fftfreq(n=len(diff), d=sr)
 
+smooth_diff = signal.savgol_filter(diff, 51, 2) 
 
+plot_diff = np.fft.fftshift(diff)
+plot_diff_smooth = np.fft.fftshift(smooth_diff)
+plot_axis_diff = np.fft.fftshift(axis_diff)
 
-# make complex numpy array with data
-complex_data_heartoff = np.empty(16000, dtype=complex)
-complex_data_heartoff.real = data_heartoff[:16000]
-complex_data_heartoff.imag = data_heartoff[16000:]
+plt.plot(plot_axis_diff, plot_diff, label="son/soff")
+plt.plot(plot_axis_diff, plot_diff_smooth, label="son/soff smooth")
 
-# compute fourier transform
-fourier_heartoff = np.fft.fft(complex_data_hearton)
-# sample rate is 62.5e6 Hz, spacing is inverse
-sample_spacing = 1.9200012288007864325e-7
-fourier_axis_heartoff = np.fft.fftfreq(n=len(complex_data_heartoff), d=sample_spacing)
-# fourier filter
-fourier_heartoff[0] = 0
-
-
-
-
-# make complex numpy array with data
-complex_diff = np.empty(16000, dtype=complex)
-complex_diff.real = diff[:16000]
-complex_diff.imag = diff[16000:]
-
-# compute fourier transform
-fourier_diff = np.fft.fft(complex_diff)
-# sample rate is 62.5e6 Hz, spacing is inverse
-sample_spacing = 1.9200012288007864325e-7
-fourier_axis_diff = np.fft.fftfreq(n=len(complex_diff), d=sample_spacing)
-# fourier filter
-fourier_diff[0] = 0
-
-# make the array smaller
-plot_diff = np.fft.fftshift(fourier_diff)[6000:10000]
-axis_diff = np.fft.fftshift(fourier_axis_diff)[6000:10000]
-# do quadratic correction
-def quad(x, a, b, c):
-    return a*x**2 + b*x + c
-
-def sfunc(x, a, b, c, d, e, f, g):
-    return a*x**6 + b*x**5 + c*x**4 + d*x**3 + e*x**2 + f*x + g
-
-
-def gaussian(x, a, mu, sigma):
-    return (a/(sigma*np.sqrt(2*np.pi)))*np.exp(-((x-mu)/sigma)**2/2)
-
-p0 = [10, 20, 30]
-popt, pcov = optimize.curve_fit(quad, axis_diff, np.abs(plot_diff)**2, p0)
-perr = np.sqrt(np.diag(pcov))
-
-print(popt[2])
-
-''' overlay test run data'''
-# load data
-data = np.loadtxt('avgtest')
-
-# make complex numpy array with data
-complex_data = np.empty(16000, dtype=complex)
-complex_data.real = data[:16000]
-complex_data.imag = data[16000:]
-
-# compute fourier transform
-fourier_data = np.fft.fft(complex_data)
-# sample rate is 62.5e6 Hz, spacing is inverse
-sample_spacing = 1.6e-8
-fourier_axis = np.fft.fftfreq(n=len(complex_data), d=sample_spacing)
-# fourier filter
-fourier_data[0] = 0 
-
-# make the array smalle
-plot_test = np.fft.fftshift(fourier_data)[7850:8150]
-axis_test = np.fft.fftshift(fourier_axis)[7850:8150]
-
-
-# plot results
-#plt.plot(np.fft.fftshift(fourier_axis_hearton), np.abs(np.fft.fftshift(fourier_hearton))**2, label="heart nebula on")
-#plt.plot(np.fft.fftshift(fourier_axis_heartoff), np.abs(np.fft.fftshift(fourie_heartoff))**2, label="heart nebula off")
-#plt.plot(axis_diff, np.abs(plot_diff)**2, label="Filtered Spectrum")
-
-curve =  quad(axis_diff, popt[0], popt[1], popt[2])
-#scurve =  sfunc(axis_diff, popt[0], popt[1], popt[2], popt[3], popt[4], popt[5],popt[6])
-
-ccurve = np.abs(plot_diff)**2 - curve
-below = (ccurve < 0)
-ccurve[below] = 0
-plt.plot(axis_diff, ccurve, label="Corrected Spectrum")
-# plot curve fit
-#plt.plot(axis_diff,curve, label="Curve Fit")
-
-plt.plot(axis_test, np.abs(plot_test)**2, label="Test Run")
-
-#plt.yscale('log')
 plt.ylabel('Intensity ~W/Hz')
 plt.xlabel(r'$\nu$ Hz')
+plt.yscale('log')
 plt.grid()
 plt.legend()
 plt.show()
