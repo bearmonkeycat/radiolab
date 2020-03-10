@@ -13,6 +13,7 @@ import astropy.time as at
 from astropy.coordinates import SkyCoord
 from astropy.coordinates import EarthLocation
 from astropy.coordinates import AltAz
+from astropy.coordinates import Galactic
 from astropy import units as u
 from astropy.time import Time
 import matplotlib.pyplot as plt
@@ -74,10 +75,10 @@ def capture(volt_range, divisor, dual_mode, nsamples, nblocks, file_name=None):
     tag_data(file_name, start, finish, parameters)
     if args.directory:
         path = "./" + args.directory + "/" + file_name
-        np.savetxt(path, raw_data)
+        np.savez_compressed(path, raw_data)
         print(f"data written to {path}")
     else:
-        np.savetxt(file_name, raw_data)
+        np.savez_compressed(file_name, raw_data)
         print(f"data written to {file_name}")
 
 
@@ -135,9 +136,6 @@ def tag_data(fname, start, finish, params):
         #print("[[ERROR GETTING INTERNET INFORMATION]]")
         pass
 
-    
-    # convert lat long to astronomical coordinates
-    # location = location
 
     # list of parameter names for data capture
     parameters = ['vrange', 'div', 'dual', 'nsamp', 'nblock', 'host', 'port', 'verbose']
@@ -158,7 +156,11 @@ def tag_data(fname, start, finish, params):
             output.write(f"Longitude: {longi}\n")
             output.write(f"Country: {ctry}\n")
             output.write(f"City: {cty}\n\n")
-
+            if args.altitude and args.azimuth:
+                aa = get_altaz(args.altitude, args.azimuth)
+                output.write(f"Observation details: {aa}\n\n")
+                output.write(f"Galactic coordinates of observation: {aa.transform_to(Galactic)}\n\n")
+                
         # write out parameters used
         output.write(f"[[PARAMETERS FROM DATA CAPTURE]]\n")
         for i in range(len(params)):
@@ -175,24 +177,32 @@ def tag_data(fname, start, finish, params):
         if args.altitude:
             output.write(f"User input altitude: {args.altitude}\n")
         if location is not None:
-            output.write(f"Location was set to lat[{location.lat}] lon[{location.lon}]")
+            output.write(f"Location was set to: {args.location}\n") 
+            output.write(f"lat[{location.lat}] lon[{location.lon}]\n")
 
         # make room for lab notes
         output.write("\n\n[[LAB NOTES]]\n")
         output.write("Vpp: \n")
         output.write("First LO power: \n")
+        output.write("First LO frequency: \n")
         output.write("Second LO power: \n")
+        output.write("Second LO frequency: \n")
         output.write("Low-pass filter: \n\n\n")
+        
         output.write('\neof\n')
 
     # tag file written    
     print(f"tag file written to {ofname}")
     
     
-def transform(latitude, longitude):
-    '''Transform coordinates'''
-    # need rotation matrix stuff
-    c = SkyCoord(latitude, longitude, unit=u.deg)
+def coordinates(latitude, longitude):
+    '''Transform coordinates to galatic coordinates'''
+    c = SkyCoord(longitude, latitude, unit='deg')
+    return c
+
+def get_altaz(alt, az):
+    obs = AltAz(alt=alt*u.deg, az=az*u.deg, location=nch, obstime=Time.now())
+    return obs
 
 def get_time(jd=None, unix=None):
    '''Return (current) time, in seconds since the Epoch (00:00:00 
@@ -227,6 +237,7 @@ def get_time(jd=None, unix=None):
 def get_utc():
     utc = Time.now()
     return utc
+
 
 def get_lst():
     lst = 0 # need to implement this
@@ -266,7 +277,6 @@ if __name__ == "__main__":
    parser.add_argument('-d', "--directory", type=str, help="[string] write data to new directory")
    parser.add_argument('-ns', "--numsamples", type=int, help="[int] sets the number of samples to take")
    parser.add_argument('-nb', "--numblocks", type=int, help="[int] sets the number of blocks to take")
-   parser.add_argument('-f', "--fast", action="store_true", help="flag to take more blocks than one at a time (makes the capture process quicker)")
    parser.add_argument('-i', "--iterations", type=int, help="[int] set the number of iterations")
    parser.add_argument('-div', "--divisor", type=int, help="[int] sets the divisor (sample rate)")
    parser.add_argument('-sr', "--srate", type=int, help="[int] returns what the sample rate would be (base_rate/input)")
@@ -326,6 +336,18 @@ if __name__ == "__main__":
        iterations = args.iterations
    else:
        iterations = 1
+
+   # check for proper alt-az values
+   if args.altitude:
+       assert(0 <= args.altitude <= 90)
+   if args.azimuth:
+       assert(0 <= args.azimuth <= 360)
+
+   # check for proper lat-lon values
+   if args.lat:
+       assert(-90 <= args.lat <= 90)
+   if args.lon:
+       assert(-180 <= args.lon <= 180) # double check this
       
    '''set location if location is toggled'''
    if args.location:
