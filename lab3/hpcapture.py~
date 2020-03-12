@@ -1,0 +1,27 @@
+import numpy as np
+from ugradio.hp_multi import HP_Multimeter
+import time
+
+duration = 3600
+dt = .25
+
+start = time.time()
+hpm = HP_Multimeter()
+hpm.start_recording(dt)
+print("recording started")
+now = time.time()
+while((now - start) < duration):
+    file_number = 1
+    print("sleeping")
+    time.sleep(60) #1200
+    print(f"hpm status: {hpm.get_recording_status()}")
+    output = hpm.get_recording_data()
+    filename = "data" + str(file_number)
+    file_number += 1
+    np.savez(filename, output)
+    now = time.time()
+    
+hpm.end_recording()
+print("recording finished")
+finish = time.time()
+print(f"total time was {finish - start}")

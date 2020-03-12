@@ -10,7 +10,8 @@ import numpy as np
 import scipy as sp
 import ugradio
 from ugradio.interf import Interferometer
-from ugradio.interf import 
+from ugradio.interf import AZ_MIN
+from ugradio.interf import AZ_MAX
 import astropy.time as at
 from astropy.coordinates import SkyCoord
 from astropy.coordinates import EarthLocation
@@ -48,6 +49,7 @@ def capture(loc, duration, celestialbody):
     '''Capture data from HP Multimeter, uses tracking module'''
 
     # logistics for storing data capture
+    file_name = None # change this later to expand functionality
     if file_name is None:
         file_name = str(get_time(unix=get_time())) + "jd"
 
@@ -74,9 +76,13 @@ def capture(loc, duration, celestialbody):
 
         # reposition telescope
         # taking into account limits of alt-az mount
+        #print(f"vector[0]={vector[0]} vector[1]={vector[1]}")
+        
         eqvector = ugradio.coord.get_altaz(vector[0], vector[1])
-        az = eqvector[0]
-        alt = eqvector[1]
+        #print(f"eqvector[0]={eqvector[0]} eqvector[1]={eqvector[1]}")
+        
+        az = eqvector[1]
+        alt = eqvector[0]
         print(f"target at az={az} alt={alt}")
         if az < AZ_MIN:
             az = az + 180
@@ -90,7 +96,9 @@ def capture(loc, duration, celestialbody):
             break
 
         # slew
-        ifm.point(az=az, alt=alt)
+        #print(f"corrected coords az={az} alt={alt}")
+        ifm.point(alt, az)
+        print(f"telescope pointing at {ifm.get_pointing()}")
 
         # check cycle time and delay if needed
         cfinish = get_time()
@@ -98,7 +106,7 @@ def capture(loc, duration, celestialbody):
         print(f"cycle took {cycle} seconds")
         if(cycle < 30):
             print("sleeping")
-            time.sleep(30-cycle)
+            time.sleep(30 - cycle)
         
     finish = get_time()
 
@@ -106,7 +114,7 @@ def capture(loc, duration, celestialbody):
 
     # save data
     print("data capture finished")
-    tag_data(file_name, start, finish, parameters)
+    tag_data(file_name, start, finish)
     print("tag file written")
     
     '''if args.directory:
@@ -119,7 +127,7 @@ def capture(loc, duration, celestialbody):
 
 
     
-def tag_data(fname, start, finish, params):
+def tag_data(fname, start, finish):
     '''Tag data capture with a text file containing time/data/location information'''
     # make output file name
     ofname = "tagfile-" + fname
@@ -310,12 +318,6 @@ if __name__ == "__main__":
       print(f"The current UTC time is: {get_utc()}")
       print(f"The current local system time is: {get_date()}")
 
-
-   # check for proper alt-az values
-   if args.altitude:
-       assert(0 <= args.altitude <= 90)
-   if args.azimuth:
-       assert(0 <= args.azimuth <= 360)
 
    # check for proper lat-lon values
    if args.lat:
