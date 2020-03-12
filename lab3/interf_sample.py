@@ -5,7 +5,6 @@ import os
 import subprocess
 import re
 import argparse
-import pprint
 import numpy as np
 import scipy as sp
 import ugradio
@@ -61,9 +60,12 @@ def capture(loc, duration, celestialbody):
 
     # capture data
     ifm = Interferometer()
+    # run capture scipt
+    subprocess.Popen(['python', 'hpcapture.py'], close_fds=True)
     start = get_time()
     # run subprocess script
     while(get_time()-start < duration):
+        '''main tracking cycle'''
         # start cycle timer
         cstart = get_time()
         
@@ -73,14 +75,11 @@ def capture(loc, duration, celestialbody):
                 vector = ugradio.coord.moonpos(get_time(unix=get_time())) # should have location, defaults to nch
             elif celestialbody == 'sun':
                 vector = ugradio.coord.sunpos(get_time(unix=get_time()))
+            else:
+                pass # add functionality for other celestial bodies (get ra, dec)
 
-        # reposition telescope
-        # taking into account limits of alt-az mount
-        #print(f"vector[0]={vector[0]} vector[1]={vector[1]}")
-        
-        eqvector = ugradio.coord.get_altaz(vector[0], vector[1])
-        #print(f"eqvector[0]={eqvector[0]} eqvector[1]={eqvector[1]}")
-        
+        # reposition telescope taking into account limits of alt-az mount
+        eqvector = ugradio.coord.get_altaz(vector[0], vector[1])   
         az = eqvector[1]
         alt = eqvector[0]
         print(f"target at az={az} alt={alt}")
@@ -96,7 +95,6 @@ def capture(loc, duration, celestialbody):
             break
 
         # slew
-        #print(f"corrected coords az={az} alt={alt}")
         ifm.point(alt, az)
         print(f"telescope pointing at {ifm.get_pointing()}")
 
@@ -107,7 +105,8 @@ def capture(loc, duration, celestialbody):
         if(cycle < 30):
             print("sleeping")
             time.sleep(30 - cycle)
-        
+
+    # tracking completed, get total time        
     finish = get_time()
 
 
@@ -210,10 +209,6 @@ def tag_data(fname, start, finish):
             output.write(f"User input latitude: {args.lat}\n")
         if args.lon:
             output.write(f"User input longitude: {args.lon}\n")
-        if args.azimuth:
-            output.write(f"User input azimuth: {args.azimuth}\n")
-        if args.altitude:
-            output.write(f"User input altitude: {args.altitude}\n")
         if location is not None:
             output.write(f"Location was set to: {args.location}\n") 
             output.write(f"lat[{location.lat}] lon[{location.lon}]\n")

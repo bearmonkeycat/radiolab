@@ -1,0 +1,7 @@
+import numpy as np
+
+output = []
+for i in range(100):
+    output.append(2**i)
+
+np.savez('testout', output)
