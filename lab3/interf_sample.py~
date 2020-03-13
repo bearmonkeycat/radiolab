@@ -52,12 +52,6 @@ def capture(loc, duration, celestialbody):
     if file_name is None:
         file_name = str(get_time(unix=get_time())) + "jd"
 
-    if args.directory:
-        if os.path.isdir(args.directory):
-            pass
-        else:
-            os.mkdir(args.directory)
-
     # capture data
     ifm = Interferometer()
     # run capture scipt
@@ -115,14 +109,6 @@ def capture(loc, duration, celestialbody):
     print("data capture finished")
     tag_data(file_name, start, finish)
     print("tag file written")
-    
-    '''if args.directory:
-        path = "./" + args.directory + "/" + file_name
-        np.savez_compressed(path, raw_data)
-        print(f"data written to {path}")
-    else:
-        np.savez_compressed(file_name, raw_data)
-        print(f"data written to {file_name}")'''
 
 
     
@@ -130,9 +116,6 @@ def tag_data(fname, start, finish):
     '''Tag data capture with a text file containing time/data/location information'''
     # make output file name
     ofname = "tagfile-" + fname
-
-    if args.directory:
-        ofname = "./" + args.directory + "/" + ofname
 
     # try to get internet information with curl
     iinfo=True
@@ -175,7 +158,7 @@ def tag_data(fname, start, finish):
 
     except:
         iinfo = False
-        #print("[[ERROR GETTING INTERNET INFORMATION]]")
+        print("[[ERROR GETTING INTERNET INFORMATION]]")
         pass
 
 
@@ -229,6 +212,7 @@ def coordinates(latitude, longitude):
     return c
 
 def get_altaz(alt, az):
+    '''Return altitude and azimuth'''
     obs = AltAz(alt=alt*u.deg, az=az*u.deg, location=nch, obstime=Time.now())
     return obs
 
@@ -301,7 +285,6 @@ if __name__ == "__main__":
    parser.add_argument('-ra', "--rightascention", type=float, help="[float] take in right ascention")
    parser.add_argument('-dec', "--declination", type=float, help="[float] take in declination")
    parser.add_argument('-c', "--capture", action="store_true", help="captures data")
-   parser.add_argument('-d', "--directory", type=str, help="[string] write data to new directory")
    parser.add_argument('-cb', "--celestialbody", type=str, help="[string] input specific celestial body [sun, moon]")
    parser.add_argument('-dt', "--trackduration", type=int, help="[int] sets time to track for")
    parser.add_argument('-t', "--time", action="store_true", help="prints the current time. Unix, utc, and local system time.")
@@ -342,20 +325,42 @@ if __name__ == "__main__":
            cb = 'moon'
 
        else:
-           cb = None
+           '''make celestialbody  with ra and dec'''
+           if args.rightascention:
+               ra = args.rightascention
+           else:
+               print("need right ascention for tracking")
+               sys.exit(1)
+           if args.declination:
+               dec = args.declination
+           else:
+               print("need declination for tracking")
+               sys.exit(1)
+           cb = (ra, dec)
 
    '''check for time duration to track'''
    if args.trackduration:
        duration = args.trackduration
    else:
-       duration = 10
+       duration = 10 # default to ten seconds
             
    '''capture data if toggled'''
    if args.capture:
-       try:
-           capture(location,duration,cb)
+       begin = time.time()
+       errors = 0
+       elapsed = time.time()
+       while((begin - elapsed) < duration):
+           '''loop will make tracking continue even if there is an error'''
+           try:
+               capture(location,duration,cb)
+               break
            
-       except Exception:
-           print("[[DATA CAPTURE ERROR]]")
-           traceback.print_exc()
-           sys.exit(1)
+           except Exception:
+               print("[[DATA CAPTURE ERROR]]")
+               errors += 1
+               traceback.print_exc()
+               elapsed = time.time()
+               print(f"time was {n} (unix), {errors} errors so far")
+               duration = duration - (begin - elapsed)
+               print(f"restarting tracking code, will continue for {duration} seconds")
+               continue

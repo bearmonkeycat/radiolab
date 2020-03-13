@@ -44,7 +44,7 @@ __version__ = "0.0.1"
 
 
 
-def capture(loc, duration, celestialbody):
+def capture(loc, duration, celestialbody, errors):
     '''Capture data from HP Multimeter, uses tracking module'''
 
     # logistics for storing data capture
@@ -55,7 +55,8 @@ def capture(loc, duration, celestialbody):
     # capture data
     ifm = Interferometer()
     # run capture scipt
-    subprocess.Popen(['python', 'hpcapture.py'], close_fds=True)
+    if errors == 0:
+        subprocess.Popen(['python', 'hpcapture.py'], close_fds=True)
     start = get_time()
     # run subprocess script
     while(get_time()-start < duration):
@@ -352,7 +353,7 @@ if __name__ == "__main__":
        while((begin - elapsed) < duration):
            '''loop will make tracking continue even if there is an error'''
            try:
-               capture(location,duration,cb)
+               capture(location,duration,cb, errors)
                break
            
            except Exception:
