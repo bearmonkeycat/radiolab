@@ -55,8 +55,9 @@ def capture(loc, duration, celestialbody, errors):
     # capture data
     ifm = Interferometer()
     # run capture scipt
+    '''
     if errors == 0:
-        subprocess.Popen(['python', 'hpcapture.py'], close_fds=True)
+        subprocess.Popen(['python', 'hpcapture.py'], close_fds=True)'''
     start = get_time()
     # run subprocess script
     while(get_time()-start < duration):
@@ -64,14 +65,14 @@ def capture(loc, duration, celestialbody, errors):
         # start cycle timer
         cstart = get_time()
         
-        # update local celestial bodies
+        # get current ra/dec of celestialbody
         if celestialbody != None:
             if celestialbody == 'moon':
                 vector = ugradio.coord.moonpos(get_time(unix=get_time())) # should have location, defaults to nch
             elif celestialbody == 'sun':
                 vector = ugradio.coord.sunpos(get_time(unix=get_time()))
             else:
-                pass # add functionality for other celestial bodies (get ra, dec)
+                vector = celestialbody
 
         # reposition telescope taking into account limits of alt-az mount
         eqvector = ugradio.coord.get_altaz(vector[0], vector[1])   
@@ -181,10 +182,6 @@ def tag_data(fname, start, finish):
             output.write(f"Longitude: {longi}\n")
             output.write(f"Country: {ctry}\n")
             output.write(f"City: {cty}\n\n")
-            if args.altitude and args.azimuth:
-                aa = get_altaz(args.altitude, args.azimuth)
-                output.write(f"Observation details: {aa}\n\n")
-                output.write(f"Galactic coordinates of observation: {aa.transform_to(Galactic)}\n\n")
                 
 
         # write out location information
@@ -361,7 +358,7 @@ if __name__ == "__main__":
                errors += 1
                traceback.print_exc()
                elapsed = time.time()
-               print(f"time was {n} (unix), {errors} errors so far")
+               print(f"time was {elapsed} (unix), {errors} errors so far")
                duration = duration - (begin - elapsed)
                print(f"restarting tracking code, will continue for {duration} seconds")
                continue
