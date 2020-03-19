@@ -1,27 +1,18 @@
 #!/usr/bin/env python
-from sys import argv
 import sys
 import os
 import subprocess
 import re
 import argparse
-import numpy as np
-import scipy as sp
 import ugradio
-from ugradio.interf import Interferometer
-from ugradio.interf import AZ_MIN
-from ugradio.interf import AZ_MAX
+from ugradio.interf import Interferometer, AZ_MIN, AZ_MAX
 import astropy.time as at
-from astropy.coordinates import SkyCoord
-from astropy.coordinates import EarthLocation
-from astropy.coordinates import AltAz
-from astropy.coordinates import Galactic
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz, Galactic
 from astropy import units as u
 from astropy.time import Time
-import matplotlib.pyplot as plt
 import traceback
 import time
-""" Program to capture data via digital sampling
+""" Program to capture data from radio interferometer via digital sampling
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -321,6 +312,14 @@ if __name__ == "__main__":
        elif args.celestialbody == 'moon':
            cb = 'moon'
 
+       elif args.celestialbody:
+           try:
+               obj = SkyCoord.from_name(args.celestialbody)
+               cb = (obj.ra, obj.dec)
+           except:
+               print("[OBJECT LOOKUP ERROR]")
+               sys.exit(1)
+               
        else:
            '''make celestialbody  with ra and dec'''
            if args.rightascention:
