@@ -6,18 +6,16 @@ duration = 3600*9 # seconds in hour*number of hours
 dt = .25 # time between samples
 
 start = time.time()
-file_number = 1
 hpm = HP_Multimeter()
 hpm.start_recording(dt)
 print("recording started")
 now = time.time()
 while((now - start) < duration):
     print("sleeping")
-    time.sleep(3600) # write data out every hour
+    time.sleep(60*5) # write data out every five mins
     print(f"hpm status: {hpm.get_recording_status()}")
     output = hpm.get_recording_data()
-    filename = "data" + str(file_number)
-    file_number += 1
+    filename = "data"
     np.savez(filename, output)
     now = time.time()
     
