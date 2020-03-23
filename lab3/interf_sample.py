@@ -46,8 +46,8 @@ def capture(loc, duration, celestialbody, errors):
     # capture data
     ifm = Interferometer()
     # run capture scipt (not currently working)
-    if errors == 0:
-        subprocess.Popen(['python', 'hpcapture.py'], close_fds=True)
+    #if errors == 0:
+    #    subprocess.Popen(['python', 'hpcapture.py'], close_fds=True)
     start = get_time()
     # run subprocess script
     while(get_time()-start < duration):

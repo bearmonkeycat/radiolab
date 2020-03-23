@@ -2,7 +2,7 @@ import numpy as np
 from ugradio.hp_multi import HP_Multimeter
 import time
 
-duration = 3600*11 # seconds in hour*number of hours
+duration = 3600*15 # seconds in hour*number of hours
 dt = .1 # time between samples
 
 start = time.time()
