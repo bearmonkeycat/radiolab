@@ -62,12 +62,17 @@ def capture(loc, duration, celestialbody, errors):
             elif celestialbody == 'sun':
                 vector = ugradio.coord.sunpos(get_time(unix=get_time()))
             else:
-                vector = celestialbody
+                j2000 = celestialbody
+                pra, pdec  = ugradio.coord.precess(j2000[0], j2000[1])
+                vector = (pra, pdec)
 
         # reposition telescope taking into account limits of alt-az mount
         eqvector = ugradio.coord.get_altaz(vector[0], vector[1])   
         az = eqvector[1]
         alt = eqvector[0]
+        if j2000:
+            print(f"target was at ra={j2000[0]} dec={j2000[1]} [J2000]")
+            print(f"target at ra={vector[0]} dec={vector[1]}")
         print(f"target at az={az} alt={alt}")
         if az < AZ_MIN:
             az = az + 180
