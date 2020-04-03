@@ -4,6 +4,7 @@ import os
 import subprocess
 import re
 import argparse
+import numpy as np
 import ugradio
 from ugradio.interf import Interferometer, AZ_MIN, AZ_MAX
 import astropy.time as at
@@ -49,6 +50,8 @@ def capture(loc, duration, celestialbody, errors):
     #if errors == 0:
     #    subprocess.Popen(['python', 'hpcapture.py'], close_fds=True)
     start = get_time()
+    intendedpositions = []
+    actualpositions = []
     # run subprocess script
     while(get_time()-start < duration):
         '''main tracking cycle'''
@@ -87,15 +90,17 @@ def capture(loc, duration, celestialbody, errors):
 
         # slew
         ifm.point(alt, az)
-        print(f"telescope pointing at {ifm.get_pointing()}")
-
+        pointing = ifm.get_pointing()
+        print(f"telescope pointing at {pointing}")
+        intendedpositions.append((alt, az))
+        actualpositions.append(pointing)
         # check cycle time and delay if needed
         cfinish = get_time()
         cycle = cfinish-cstart
         print(f"cycle took {cycle} seconds")
-        if(cycle < 30):
+        if(cycle < 10):
             print("sleeping")
-            time.sleep(30 - cycle)
+            time.sleep(10 - cycle)
 
     # tracking completed, get total time        
     finish = get_time()
@@ -105,6 +110,8 @@ def capture(loc, duration, celestialbody, errors):
     # save data
     print("data capture finished")
     tag_data(file_name, start, finish)
+    np.savez('intendedpositionsfile', intendedpositions)
+    np.savez('actualpositionsfile', actualpositions)
     print("tag file written")
 
 
