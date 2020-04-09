@@ -52,6 +52,7 @@ def capture(loc, duration, celestialbody, errors):
     start = get_time()
     intendedpositions = []
     actualpositions = []
+    j2000 = None
     # run subprocess script
     while(get_time()-start < duration):
         '''main tracking cycle'''
