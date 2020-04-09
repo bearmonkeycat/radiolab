@@ -45,15 +45,15 @@ def virgo(x):
 arrayfreq = 1.07e4
 
 # plot measured values
-orion = 36.198
-craby = 41.415
-cassy = 55.569
-cygA = 0
+virgoA = 131.54
+craby = 169.97
+cassy = 154.33
+cygA = 140.75
 
-plt.loglog(arrayfreq, orion, "o", markersize=7, label="Orion*")
+plt.loglog(arrayfreq, virgoA, "o", markersize=7, label="Virgo*")
 plt.loglog(arrayfreq, craby, "o", markersize=7, label="Crab*")
 plt.loglog(arrayfreq, cassy, "o", markersize=7, label="Cas*")
-#plt.loglog(arrayfreq, cygA, "o", markersize=7, label="Cyg*")
+plt.loglog(arrayfreq, cygA, "o", markersize=7, label="Cyg*")
 
 caslow = np.linspace(22,300,1000)
 cashigh = np.linspace(300, 31e3, 1000)
@@ -71,25 +71,21 @@ plt.loglog(virgospace, virgo(virgospace), label=r"Virgo A")
 
 
 # plot calculated values
+orionVal = 434
 plt.loglog(arrayfreq, crab(arrayfreq), color="k", markersize=5, marker="+")
 plt.loglog(arrayfreq, cygAhigh(arrayfreq), color="k", markersize=5, marker="+")
 plt.loglog(arrayfreq, casAhigh(arrayfreq), color="k", markersize=5, marker="+")
 plt.loglog(arrayfreq, virgo(arrayfreq), color="k", markersize=5, marker="+")
-print(f'crab should be {crab(arrayfreq)}')
-print(f'virgo should be {virgo(arrayfreq)}')
-print(f'cyg should be {cygAhigh(arrayfreq)}')
-print(f'cas should be {casAhigh(arrayfreq)}')
-plt.annotate(f'{crab(arrayfreq):.2f}', (arrayfreq, crab(arrayfreq)))
-plt.annotate(f'{casAhigh(arrayfreq):.2f}', (arrayfreq, casAhigh(arrayfreq) - 150))
-plt.annotate(f'{virgo(arrayfreq):.2f}', (arrayfreq, virgo(arrayfreq)))
-plt.annotate(f'{cygAhigh(arrayfreq):.2f}', (arrayfreq, cygAhigh(arrayfreq)))
-
+plt.annotate(f'{crab(arrayfreq):.2f}', (arrayfreq + 1000, crab(arrayfreq)))
+plt.annotate(f'{casAhigh(arrayfreq):.2f}', (arrayfreq + 1000, casAhigh(arrayfreq) - 100))
+plt.annotate(f'{virgo(arrayfreq):.2f}', (arrayfreq + 1000, virgo(arrayfreq)))
+plt.annotate(f'{cygAhigh(arrayfreq):.2f}', (arrayfreq + 1000, cygAhigh(arrayfreq)))
 
 
 plt.grid()
 plt.legend()
 plt.ylabel(r'Flux Density [Jy]')
-plt.xlabel(r'$\nu [MHz]$')
+plt.xlabel(r'$\nu$ [MHz]')
 plt.show()
 
-# embed()
+embed()

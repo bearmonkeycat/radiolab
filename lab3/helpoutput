@@ -1,0 +1,25 @@
+usage: interf_sample.py [-h] [-loc LOCATION] [-lt LAT] [-lg LON]
+                        [-ra RIGHTASCENTION] [-dec DECLINATION] [-c]
+                        [-cb CELESTIALBODY] [-dt TRACKDURATION] [-t]
+
+Program used to capture data via digital sampling
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -loc LOCATION, --location LOCATION
+                        [string] enter location instead of lat, lon. Format:
+                        'address, city, state', e.g., 'University Dr.,
+                        Berkeley, CA'
+  -lt LAT, --lat LAT    [float] takes in latitude
+  -lg LON, --lon LON    [float] takes in longitude
+  -ra RIGHTASCENTION, --rightascention RIGHTASCENTION
+                        [float] take in right ascention
+  -dec DECLINATION, --declination DECLINATION
+                        [float] take in declination
+  -c, --capture         captures data
+  -cb CELESTIALBODY, --celestialbody CELESTIALBODY
+                        [string] input specific celestial body [sun, moon]
+  -dt TRACKDURATION, --trackduration TRACKDURATION
+                        [int] sets time to track for
+  -t, --time            prints the current time. Unix, utc, and local system
+                        time.
