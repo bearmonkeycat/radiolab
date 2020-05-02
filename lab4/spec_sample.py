@@ -395,7 +395,7 @@ if __name__ == "__main__":
    if args.lat:
        assert(-90 <= args.lat <= 90)
    if args.lon:
-       assert(-180 <= args.lon <= 180) # double check this
+       assert(-180 <= args.lon <= 180)
 
        
    '''set location if location is toggled'''
@@ -407,17 +407,15 @@ if __name__ == "__main__":
            print("[[LOCATION LOOKUP ERROR]]")
            sys.exit(1)
    else:
-       location = leuschner
+       location = leuschner # change this depending on observatory
 
        
    '''check for local celetial bodies'''
    if args.target:
        if  args.target == 'sun':
            tg = 'sun'
-        
        elif args.target == 'moon':
            tg = 'moon'
-
        elif args.target:
            try:
                obj = SkyCoord.from_name(args.target)
@@ -426,7 +424,6 @@ if __name__ == "__main__":
            except:
                print("[[OBJECT LOOKUP ERROR]]")
                sys.exit(1)
-               
        else:
            '''make target with ra and dec'''
            if args.rightascention:
@@ -450,9 +447,13 @@ if __name__ == "__main__":
             
    '''capture data if toggled'''
    if args.capture:
+       # main loop variables
        begin = time.time()
        errors = 0
-       elapsed = time.time()
+       now = time.time()
+       elapsed = begin - now
+       
+       # check for target file
        if args.targetfile:
            targetfile = np.load(args.targetfile, allow_pickle=True).item()
            print(f"Iterating through target file {args.targetfile}.")
@@ -463,7 +464,7 @@ if __name__ == "__main__":
                print("[[NO COMPLETED FILE]]")
                checkfile = []
            
-       while((begin - elapsed) < duration):
+       while(elapsed < duration):
            '''loop will make tracking continue even if there is an error'''
            print(f"Total tracking time: {begin - elapsed}")
            print(f"Remaining tracking time: {duration - (begin - elapsed)}")
@@ -482,27 +483,28 @@ if __name__ == "__main__":
                                checkfile.append(targetfile[f'{i}'].tolist())
                                np.save('completed.npy', checkfile)
                                print(f"Pointing {i} completed, checkfile saved.\n\n")
-                               elapsed = time.time()
+                               now = time.time()
+                               elapsed = begin - now
                            else:
                                print("[[TRACKING ERROR]]")
                                print("[[SWITCHING TO NEXT POINTING]]")
-                               elapsed = time.time()
+                               now = time.time()
+                               elapsed = begin - now
                                continue
                            
                        except Exception:
                            print("[[DATA CAPTURE ERROR]]")
                            errors += 1
                            traceback.print_exc()
-                           elapsed = time.time()
-                           print(f"time was {elapsed} (unix), {errors} errors so far")
-                           duration = duration - (begin - elapsed)
-                           if duration > args.trackduration:
-                               print(f"past scheduled track duration")
+                           now = time.time()
+                           elapsed = begin - now
+                           if elapsed > duration:
+                               print("[[BEYOND SCHEDULED TRACK DURATION]]")
                                np.save('completed.npy', checkfile)
-                               print(f"checkfile saved")
-                               print(f"exiting")
+                               print("Checkfile saved, exiting.")
                                sys.exit(1)
-                           print(f"Restarting tracking code, will continue for {duration} seconds.\n\n")
+                               # need anything here?
+                           print(f"Restarting tracking code, there have been {errors} errors, will continue for {duration} seconds.\n\n")
                            continue
                    else:
                        continue
@@ -520,14 +522,13 @@ if __name__ == "__main__":
                    print("[[DATA CAPTURE ERROR]]")
                    errors += 1
                    traceback.print_exc()
-                   elapsed = time.time()
-                   print(f"time was {elapsed} (unix), {errors} errors so far")
-                   duration = duration - (begin - elapsed)
-                   if duration > args.trackduration:
+                   now = time.time()
+                   elapsed = begin - now 
+                   if elapsed > duration:
                        print("[[BEYOND SCHEDULED TRACK DURATION]]")
                        print("[[EXITING]]")
-                       sys.exit(1)
-                   print(f"Restarting tracking code, will continue for {duration} seconds.\n\n")
+                       sys.exit(1)                       
+                   print(f"Restarting tracking code, there have been {errors} errors, will continue for {duration} seconds.\n\n")
                    continue
 
                print("[[ALL POINTINGS ATTEMPTTED]]")
