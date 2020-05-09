@@ -42,7 +42,7 @@ def capture(loc, integration, target, errors, file_name=None):
     breakout = 0
     # verify pointing
     # get current ra/dec of target
-    az, alt, breakout = get_coordinates(target)
+    az, alt, breakout = get_coordinates(target, verify=True)
     if breakout == 1:
         return 1
     
@@ -100,11 +100,15 @@ def capture(loc, integration, target, errors, file_name=None):
         # start cycle timer
         cstart = get_time()
 
-        # get coordiantes
+        # get coordiantes, check for breakout
         vector, eqvector,  breakout = get_coordinates(target)
-
+        if breakout == 1:
+            print("[[BREAKING OUT OF POINTING]]")
+            return 1
+        
         # slew
         scope.point(eqvector[0], eqvector[1])
+        
         # compensate for large slew time on first pointing
         if first_point == 1:
             integration = integration + (get_time() - start)
@@ -177,7 +181,7 @@ def capture(loc, integration, target, errors, file_name=None):
 
 #####################################################################################
 # get current ra/dec of target
-def get_coordinates(target):
+def get_coordinates(target, verify=False):
     '''Return current precessed coordinates of target'''
     if target == 'moon':
         vector = ugradio.coord.moonpos(get_time(unix=get_time()))
@@ -199,24 +203,29 @@ def get_coordinates(target):
 
     # check azimuth
     if az < AZ_MIN:
-        az = AZ_MIN
         print('[[OBJECT BELOW TELESCOPE AZIMUTH]]')
         return vector, eqvector, 1    
     elif az > AZ_MAX:
-        az = AZ_MAX
         print('[[OBJECT ABOVE TELESCOPE AZIMUTH]]')
         return vector, eqvector, 1
     
     # check altitude
-    if alt < ALT_MIN:
-        alt = ALT_MIN
-        print('[[OBJECT BELOW TELESCOPE HORIZON]]')
-        return vector, eqvector, 1
-    elif alt > ALT_MAX:
-        alt = ALT_MAX
-        print('[[OBJECT ABOVE  TELESCOPE HORIZON]]')
-        return vector, eqvector, 1
-    
+    if verify:
+        if alt < (ALT_MIN + np.pi):
+            print('[[OBJECT BELOW TELESCOPE HORIZON]]')
+            return vector, eqvector, 1
+        elif alt > ALT_MAX:
+            print('[[OBJECT ABOVE  TELESCOPE HORIZON]]')
+            return vector, eqvector, 1
+    else:
+        
+        if alt < (ALT_MIN):
+            print('[[OBJECT BELOW TELESCOPE HORIZON]]')
+            return vector, eqvector, 1
+        elif alt > ALT_MAX:
+            print('[[OBJECT ABOVE  TELESCOPE HORIZON]]')
+            return vector, eqvector, 1
+        
     # coordiantes are good, return them
     return vector, eqvector, 0
 
@@ -504,7 +513,7 @@ if __name__ == "__main__":
                                print("Checkfile saved, exiting.")
                                sys.exit(1)
                                # need anything here?
-                           print(f"Restarting tracking code, there have been {errors} errors, will continue for {duration} seconds.\n\n")
+                           print(f"Restarting tracking code, there have been {errors} errors, will continue for {duration - elapsed} seconds.\n\n")
                            continue
                    else:
                        continue
@@ -528,7 +537,7 @@ if __name__ == "__main__":
                        print("[[BEYOND SCHEDULED TRACK DURATION]]")
                        print("[[EXITING]]")
                        sys.exit(1)                       
-                   print(f"Restarting tracking code, there have been {errors} errors, will continue for {duration} seconds.\n\n")
+                   print(f"Restarting tracking code, there have been {errors} errors, will continue for {duration - elapsed} seconds.\n\n")
                    continue
 
                print("[[ALL POINTINGS ATTEMPTTED]]")
